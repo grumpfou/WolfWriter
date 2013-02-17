@@ -1,0 +1,25 @@
+<NotepadPlus>
+    <Project name="WolfWriter">
+        <File name="WolfWriterCommon.py" />
+        <File name="WolfWriterConstants.py" />
+        <File name="WolfWriterError.py" />
+        <File name="WolfWriterTest.py" />
+        <Folder name="WWGui">
+            <File name="WolfWriterMainWindow.py" />
+            <File name="WolfWriterTreeView.py" />
+            <File name="WolfWriterTextEdit.py" />
+            <File name="WolfWriterHighlighter.py" />
+            <File name="WolfWriterTabWidget.py" />
+            <File name="WolfWriterEncyPage.py" />
+            <File name="WolfWriterLanguages.py" />
+        </Folder>
+        <Folder name="WWCore">
+            <File name="WolfWriterBook.py" />
+            <File name="WolfWriterScene.py" />
+            <File name="WolfWriterEncyclopedia.py" />
+            <File name="WolfWriterReadConfigFile.py" />
+            <File name="WolfWriterNodeXML.py" />
+            <File name="WolfWriterWord.py" />
+        </Folder>
+    </Project>
+</NotepadPlus>

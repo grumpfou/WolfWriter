@@ -1,0 +1,8 @@
+<?xml version="1.0" ?>
+<structure author="RD" creation_date="20120502030212" project_name="ProjectTitle" versionXML_WW="0.9">
+  <story date="20120903124430" title="StoryTitle">
+    <chapter title="FirstChapterTitle">
+      <scene_link value="Scene0000.xml"/>
+    </chapter>
+  </story>
+</structure>

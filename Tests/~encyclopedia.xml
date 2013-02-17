@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<encyclopedia>
+  <entry name="Claymore" type="Navire">
+    <desc>Corvette.</desc>
+  </entry>
+  <entry name="Boisberthelot" type="personage">
+    <desc>Capitaine de la corvette Claymore. Compte.</desc>
+  </entry>
+  <entry name="Bonnet-Rouge" type="Bataillon">
+    <desc>Bataillon républicain.</desc>
+  </entry>
+  <entry name="Vendée" type="Région">
+    <desc>Région de la révolte contre les républicains.</desc>
+  </entry>
+  <entry name="Jersey" type="Port"/>
+  <entry name="Guernesey" type="Port"/>
+  <entry name="Saint-Malo" type="Port"/>
+  <entry name="Granville" type="Port"/>
+  <entry name="France" type="Pays"/>
+  <entry name="Minquiers" type="écueils"/>
+  <entry name="Gacquoil" type="personage">
+    <desc>Pilote du Claymore</desc>
+  </entry>
+  <entry name="Vieuville" type="personage">
+    <desc>Chevalier</desc>
+  </entry>
+  <entry name="Siscoignard" type="">
+    <desc>Vivandière. Mère de Georgette, René-Jean et Gros-Alain. Récupérée par le bataillons du Bonnet-Rouge.</desc>
+  </entry>
+  <entry name="René-Jean" type="">
+    <desc>Fils de Siscoignard.</desc>
+  </entry>
+  <entry name="Gros-Alain" type="">
+    <desc>Fils cadet de Siscoignard.</desc>
+  </entry>
+  <entry name="Georgette" type="">
+    <desc>Fille de Siscoignard.</desc>
+  </entry>
+  <entry name="vivandière" type="">
+    <desc>Désgne souvent Siscoignard.</desc>
+  </entry>
+</encyclopedia>

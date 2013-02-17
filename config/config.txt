@@ -1,0 +1,8 @@
+
+AUTO_CORRECTION : jms jamais | tjs toujours | svt souvent | ê être | gvt gouvernement | gvts gouvernements | bcp   beaucoup | qd   quand | qqun   quelqu’un | qq   quelques | qt   quant | ptt   petit | ptts   petits | ptte   petite | pttes   petites | tt   tout | tte   toute | ttes   toutes | ts   tous | mê   même | aps pas | ns   nous | vs   vous | pk   pourquoi | ds   dans | gd   grand | gds   grands | gde   grande | gdes   grandes | gpe   groupe | gpes   groupes | mvt   mouvement | mvts   mouvements | nb   nombre | nbs   nombres | nv   nouvea | nvx   nouveaux | nvlle   nouvelle | nvlles   nouvelles | pb   problème | pbs   problèmes | pbq   problématique | qc   quelque chose 
+
+EXTERNAL_SOFT_PATH : "C:\Program Files (x86)\Druide\Antidote 7\Programmes32\antido32.exe"
+
+LINE_HEIGHT : 150
+
+DLT_OPEN_SAVE_SITE : ~\Documents\

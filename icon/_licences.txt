@@ -1,0 +1,12 @@
+gnu-gpl-3-fr.txt:
+-----------------
+  - kf-next.png
+  - kf-previous.png
+  - kf-bookmark-new.png
+  - kf-bookmark-missing.png
+  - kf-edit-find.png
+  - kf-arrow-down.png
+  - kf-stock_up.png
+  - kf-tools-check-spelling.png
+  - kf-document-page-setup.png
+  - kf-tag-new.png
