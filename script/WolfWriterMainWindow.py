@@ -94,7 +94,7 @@ class WWMainWindow(QtGui.QMainWindow):
 	def setup_connections(self):
 		self.connect(self.actionNewBook			, QtCore.SIGNAL("triggered()"), self.SLOT_actionNewBook)
 		self.connect(self.actionOpenBook		, QtCore.SIGNAL("triggered()"), self.SLOT_actionOpenBook)
-		# self.connect(self.treeView				, QtCore.SIGNAL("objectActivated( PyQt_PyObject )"),self.SLOT_objectActivated)
+		self.connect(self.treeView				, QtCore.SIGNAL("objectActivated( PyQt_PyObject )"),self.SLOT_objectActivated)
 		self.connect(self.actionSaveAsBook		, QtCore.SIGNAL("triggered()"), self.SLOT_actionSaveAsBook)
 		self.connect(self.actionSaveBook		, QtCore.SIGNAL("triggered()"), self.SLOT_actionSaveBook)
 		self.connect(self.actionSaveArchive		, QtCore.SIGNAL("triggered()"), self.SLOT_actionSaveArchive)
