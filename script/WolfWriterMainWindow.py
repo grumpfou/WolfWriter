@@ -94,7 +94,7 @@ class WWMainWindow(QtGui.QMainWindow):
 	def setup_connections(self):
 		self.connect(self.actionNewBook			, QtCore.SIGNAL("triggered()"), self.SLOT_actionNewBook)
 		self.connect(self.actionOpenBook		, QtCore.SIGNAL("triggered()"), self.SLOT_actionOpenBook)
-		self.connect(self.treeView				, QtCore.SIGNAL("objectActivated( PyQt_PyObject )"),self.SLOT_objectActivated)
+		# self.connect(self.treeView				, QtCore.SIGNAL("objectActivated( PyQt_PyObject )"),self.SLOT_objectActivated)
 		self.connect(self.actionSaveAsBook		, QtCore.SIGNAL("triggered()"), self.SLOT_actionSaveAsBook)
 		self.connect(self.actionSaveBook		, QtCore.SIGNAL("triggered()"), self.SLOT_actionSaveBook)
 		self.connect(self.actionSaveArchive		, QtCore.SIGNAL("triggered()"), self.SLOT_actionSaveArchive)
@@ -299,6 +299,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		# this Slot is called when an object in the tree is activated :
 		# - if it is a chapter or the story, it allows to change the title
 		# - if it is the scene it is openning it in the WWSceneEdit
+		
 		if isinstance(object,WWScene):
 			self.lineEditScene.setText(object.title)
 			self.textEdit.setScene(object,self.book)

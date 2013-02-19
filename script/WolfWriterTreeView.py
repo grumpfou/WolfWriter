@@ -41,12 +41,13 @@ I plan to merge this class with the WWStory, WWChapters and WWScene in a further
 class WWTreeView(QtGui.QTreeView):
 	def __init__(self,story,parent=None):
 		QtGui.QTreeView.__init__(self,parent)			
-		self.setStory(story)
-		
-	def setStory(self,story):
 		model=WWTreeModel(story,parent=self)
 		self.setModel(model)
 		self.setup_actions()
+		# self.setStory(story)
+		
+	def setStory(self,story):
+		self.model().story=story
 		
 	def setup_actions(self):
 		# self.actionRemoveRow=QtGui.QAction("&Remove row",self)
@@ -83,12 +84,18 @@ class WWTreeView(QtGui.QTreeView):
 		# self.actionRefresh.setShortcuts(QtGui.QKeySequence.Refresh)
 		# self.connect(self.actionRefresh, QtCore.SIGNAL("triggered()"), self.SLOT_actionRefresh)
 		
-		self.connect(self, QtCore.SIGNAL("activated(const QModelIndex & )"), self.SLOT_activated )
+		self.connect(self, QtCore.SIGNAL("activated (const QModelIndex & )"), self.SLOT_activated )
 		
 		
 		# self.actionTest=QtGui.QAction("&Test",self)
 		# self.connect(self.actionTest, QtCore.SIGNAL("triggered()"), self.SLOT_test )
-		
+	
+	def mouseDoubleClickEvent(self,event):
+		#prevent or roll/deroll the chaper
+		QtGui.QAbstractItemView.mouseDoubleClickEvent(self,event)
+	
+	
+	
 	############### SLOTS ###############
 	# def SLOT_removeRow(self):
 		# index=self.selectionModel().currentIndex()
@@ -165,7 +172,6 @@ class WWTreeView(QtGui.QTreeView):
 			# itemScene.setData(i, column)
 
 	def SLOT_actionMoveObjectUp(self):
-		print "SLOT_actionMoveObjectUp"
 		index=self.selectionModel().currentIndex()
 		row=index.row()
 		dist=index.distanceToRoot()
@@ -481,7 +487,7 @@ if __name__ == '__main__':
 	app = QtGui.QApplication(sys.argv)
 	
 	
-	pp="C:/Users/Renaud/Documents/Programmation/Python/Writing_help/WolfWriter/Test/testa.zip"
+	pp=pp="C:\\Users\\Renaud\\Documents\\Programmation\\Python\\WolfWriter_Test\\TestPerso\\testa.zip"
 	# xml_file=XML.parse(pp)
 	# root = xml_file.documentElement
 	# n=root.getFirstElementsByTagName('story')

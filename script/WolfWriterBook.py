@@ -445,9 +445,7 @@ class WWChapter (WWNodeAbstract):
 			tmp,link=os.path.split(sc.filename)
 			link=link[len(TMP_FILE_MARK):] #we remove the TMP_FILE_MARK from the link
 			new_children_names.append(link)
-		print "AV children_names  :  ",self.children_names
 		self.children_names=new_children_names
-		print "AP children_names  :  ",self.children_names
 		
 	def changeTitle(self,newTitle,origin="local"):
 		self.title=newTitle
