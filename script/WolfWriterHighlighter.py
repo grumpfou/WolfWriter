@@ -13,7 +13,7 @@ class WWHighlighter (QtGui.QSyntaxHighlighter):
 	
 	def reload_word_set(self):
 		if self.book==None:
-			self.word_set=WWWordSet([u'Athelia',u'Harlan'])
+			self.word_set=WWWordSet([u'Marie',u'Pierre'])
 		else:
 			print "coucou1"
 			self.word_set=self.book.encyclopedia.word_set

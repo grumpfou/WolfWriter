@@ -77,17 +77,21 @@ class WWBook:
 					print "dir_arch,fil_arch  :  ",dir_arch,fil_arch
 					if dir_arch=='':
 						j=TMP_FILE_MARK+fil_arch
+						self.list_files.append(j)
+						fp = open(os.path.join(d,j), "wb")  ## creation en local du nouveau fichier
+						fp.write(data)                         ## ajout des donnees du fichier compresse dans le fichier local
+						
 					else:
-						j=os.path.join(dir_arch,TMP_FILE_MARK+fil_arch)
+						pass #for now we do not decompress the archives
+						# j=os.path.join(dir_arch,TMP_FILE_MARK+fil_arch)
+
 					print "j  :  ",j
 						
-					fp = open(os.path.join(d,j), "wb")  ## creation en local du nouveau fichier
-					fp.write(data)                         ## ajout des donnees du fichier compresse dans le fichier local
+
 				except BaseException, e:
 					raise e
 				finally:
 					fp.close()
-				self.list_files.append(j)	
 		finally:
 			zfile.close()
 	
@@ -115,6 +119,15 @@ class WWBook:
 			zfile.close()
 		self.list_files=list(new_list_names)
 	
+	def del_files(self,dirname=None):
+		if dirname==None:
+			dirname,f=os.path.split(self.archivepath)
+		for i in self.list_files:
+			try:
+				os.remove(os.path.join(dirname,i))
+			except:
+				# print "struggle to supress ",i
+				pass
 
 			
 	def save_book(self,filepath=None):
@@ -266,15 +279,20 @@ class WWStructure (WWNodeFirstAbstract):
 			yield word
 			
 	def create_new_scene(self,title="Untitled"):
-		newname=TMP_FILE_MARK+"Scene0000.txt"
-		for i in range(10000):
+
+		newname="Scene0000.xml"
+		for i in range(1,10000):
+			print "self.getFirstNode().list_associate_files  :  ",self.getFirstNode().list_associate_files
 			if newname not in self.getFirstNode().list_associate_files:
 				break
 			else :
-				newname=TMP_FILE_MARK+"Scene"+str(i).zfill(CONSTANTS.MAX_ZFILL)+".txt"
+				newname="Scene"+str(i).zfill(CONSTANTS.MAX_ZFILL)+".xml"
+				
+
 			
 			
-		filepath=os.path.join(self.getFirstNode().dirname,newname)
+		filepath=os.path.join(self.getFirstNode().dirname,TMP_FILE_MARK+newname)
+		self.getFirstNode().book.list_files+=[TMP_FILE_MARK+newname]
 		newScene=WWScene(pathway=filepath,new=True,parent=None,parent_file=self.getFirstNode(),title=title)
 		
 		return newScene

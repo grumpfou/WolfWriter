@@ -234,6 +234,8 @@ class WWMainWindow(QtGui.QMainWindow):
 			if (res != QtGui.QMessageBox.Yes) and (res != QtGui.QMessageBox.No):
 				return False
 		
+		if CONSTANTS.DELETE_TEMP_FILES and self.book.archivepath!=None: #if we have to delete the temporary files and if the book is not a new one
+				self.book.del_files()
 		self.book=WWBook(archivepath=abs_path_new_book) # we load the empty book file
 		self.book.archivepath=None					# we put it's archivepath to None (allow the software to ask 
 													# 							where to save at the first saving)
@@ -248,10 +250,13 @@ class WWMainWindow(QtGui.QMainWindow):
 			res=self.doSaveDialog()
 			if (res != QtGui.QMessageBox.Yes) and (res != QtGui.QMessageBox.No):
 				return False
+		
 		dialog= QtGui.QFileDialog(self)
 		
 		filename = dialog.	getOpenFileName(self,"Select a archive",self.get_default_opening_saving_site())
 		if filename:
+			if CONSTANTS.DELETE_TEMP_FILES and self.book.archivepath!=None: #if we have to delete the temporary files and if the book is not a new one
+				self.book.del_files()
 			filename=unicode(filename)
 			self.book=WWBook(archivepath=filename)
 			# self.treeView.setStory(self.book.structure.story)
@@ -266,8 +271,14 @@ class WWMainWindow(QtGui.QMainWindow):
 		if filepath:
 			self.textEdit.uploadScene()
 			filepath=unicode(filepath)
+			old_archivepath=self.book.archivepath
 			self.book.save_book(filepath=filepath)
 			self.book.archivepath=filepath
+			
+			dirname,f=os.path.split(old_archivepath)
+			
+			if CONSTANTS.DELETE_TEMP_FILES and self.book.archivepath!=None: #if we have to delete the temporary files and if the book is not a new one
+				self.book.del_files(dirname)
 	
 	def SLOT_actionSaveBook(self):
 		if self.book.archivepath==None: #if the book has never been saved
@@ -421,6 +432,8 @@ class WWMainWindow(QtGui.QMainWindow):
 			else:
 				event.ignore()
 		else:
+			if CONSTANTS.DELETE_TEMP_FILES and self.book.archivepath!=None: #if we have to delete the temporary files and if the book is not a new one
+				self.book.del_files()
 			event.accept()
 
 	def doSaveDialog(self):
@@ -466,7 +479,6 @@ if __name__ == '__main__':
 		bk.archivepath=None
 		
 		
-	# pp="C:/Users/Renaud/Documents/Programmation/Python/Writing_help/WolfWriter/Test/testa.zip"
 	
 	mainWindow = WWMainWindow(bk)
 	mainWindow.show()

@@ -42,6 +42,7 @@ class WWConstants:
 			"EXTERNAL_SOFT_PATH"	: ( unicode		  ,	""			),
 			"LINE_HEIGHT"			: ( float		  , 100			),
 			"RECHECK_SCENE_OPEN"	: ( bool		  , False		),
+			"DELETE_TEMP_FILES"		: ( bool		  , True		),
 			"DLT_OPEN_SAVE_SITE"	: ( unicode		  , "~"			)
 			}
 		for key in self.all_constants.keys():
