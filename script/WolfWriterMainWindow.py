@@ -351,18 +351,22 @@ class WWMainWindow(QtGui.QMainWindow):
 	def SLOT_actionDeleteChapter    (self):
 		index=self.treeView.selectionModel().currentIndex()
 		dist=index.distanceToRoot()
-		while dist==DEPTH_SCENE:
+		while dist==DEPTH_SCENE-1:
 			index=index.parent()
 			dist=index.distanceToRoot()
 		self.treeView.setCurrentIndex(index)
 		self.treeView.SLOT_removeObject()
-		self.SLOT_somethingChanged()
-	def SLOT_actionAddScene         (self):
+		# self.SLOT_somethingChanged()
+	def SLOT_actionAddScene(self):
 		self.treeView.SLOT_addScene()
 		self.SLOT_somethingChanged()
 	def SLOT_actionDeleteScene      (self):
-		### TODO ###
-		pass
+		if self.textEdit.scene!=None:
+			index=self.treeView.getIndex(self.textEdit.scene)
+			self.treeView.setCurrentIndex(index)
+			self.treeView.SLOT_removeObject()
+			
+			
 	def SLOT_actionSendToAntidote (self):
 		# Send the scene to another software (mine is called Antidote and accept only a certain type of encoding).
 		path=CONSTANTS.EXTERNAL_SOFT_PATH

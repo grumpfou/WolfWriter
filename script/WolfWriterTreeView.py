@@ -44,6 +44,7 @@ class WWTreeView(QtGui.QTreeView):
 		model=WWTreeModel(story,parent=self)
 		self.setModel(model)
 		self.setup_actions()
+		self.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu ) 
 		# self.setStory(story)
 		
 	def setStory(self,story):
@@ -56,28 +57,44 @@ class WWTreeView(QtGui.QTreeView):
 		# self.actionInsertRow=QtGui.QAction("&Insert row",self)
 		# self.connect(self.actionInsertRow, QtCore.SIGNAL("triggered()"), self.SLOT_insertRow )
 		
-		self.actionAddChapter=QtGui.QAction("&Add Chapter",self)
+		self.actionAddChapter=QtGui.QAction("&Add Chapter after",self)
 		self.actionAddChapter.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"add_chap.png")))
+		self.addAction(self.actionAddChapter)
 		self.connect(self.actionAddChapter, QtCore.SIGNAL("triggered()"), self.SLOT_addChapter )
 		
+		self.actionAddChapterBefore=QtGui.QAction("&Add Chapter before",self)
+		# self.actionAddChapter.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"add_chap.png")))
+		self.addAction(self.actionAddChapterBefore)
+		self.connect(self.actionAddChapterBefore, QtCore.SIGNAL("triggered()"), self.SLOT_addChapterBefore )
 
-		self.actionAddScene=QtGui.QAction("&Add Scene",self)
+		self.actionAddScene=QtGui.QAction("&Add Scene after",self)
 		self.actionAddScene.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"add_scene.png")))
+		self.addAction(self.actionAddScene)
 		self.connect(self.actionAddScene, QtCore.SIGNAL("triggered()"), self.SLOT_addScene )
+		
+		self.actionAddSceneBefore=QtGui.QAction("&Add Scene before",self)
+		# self.actionAddSceneBefore.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"add_scene.png")))
+		self.addAction(self.actionAddSceneBefore)
+		self.connect(self.actionAddSceneBefore, QtCore.SIGNAL("triggered()"), self.SLOT_addSceneBefore )
+		
+		
 		
 		self.actionMoveObjectUp=QtGui.QAction("&Move object up",self)
 		self.actionMoveObjectUp.setShortcuts(QtGui.QKeySequence("Ctrl+Up"))
 		self.actionMoveObjectUp.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"1uparrow.png")))
+		self.addAction(self.actionMoveObjectUp)
 		self.connect(self.actionMoveObjectUp, QtCore.SIGNAL("triggered()"), self.SLOT_actionMoveObjectUp )
 
 		self.actionMoveObjectDown=QtGui.QAction("&Move object down",self)
 		self.actionMoveObjectDown.setShortcuts(QtGui.QKeySequence("Ctrl+Down"))
 		self.actionMoveObjectDown.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"1downarrow.png")))
+		self.addAction(self.actionMoveObjectDown)
 		self.connect(self.actionMoveObjectDown, QtCore.SIGNAL("triggered()"), self.SLOT_actionMoveObjectDown )
 
 		self.actionRemoveObject=QtGui.QAction("&Remove the selected object",self)
 		self.actionRemoveObject.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"del_object.png")))
 		self.actionRemoveObject.setShortcuts(QtGui.QKeySequence.Delete)
+		self.addAction(self.actionRemoveObject)
 		self.connect(self.actionRemoveObject, QtCore.SIGNAL("triggered()"), self.SLOT_removeObject )
 		
 		# self.actionRefresh=QtGui.QAction("&Refresh the informations",self)
@@ -105,18 +122,18 @@ class WWTreeView(QtGui.QTreeView):
 		# self.model().insertRows(index.row(),1,index.parent())
 	def SLOT_test(self):
 		print 'test'		
-	def SLOT_addChapter(self):
+	def SLOT_addChapter(self,place=0):
 		index=self.selectionModel().currentIndex()
 		dist=index.distanceToRoot()
 		
 		if 0<dist<DEPTH_SCENE-1:
-			row=index.row()+1
+			row=index.row()+1+place
 			index=index.parent()
 		elif dist==0:
 			row=0
 		else :
 			index=index.parent()
-			row=index.row()+1
+			row=index.row()+1+place
 			index=index.parent()
 		
 			
@@ -143,15 +160,17 @@ class WWTreeView(QtGui.QTreeView):
 		self.model().insertRows(0,1,index,list_objects=[new_scene])
 		self.SLOT_emitChanged()
 
+	def SLOT_addChapterBefore(self):
+		self.SLOT_addChapter(place=-1)
 		
 		
-	def SLOT_addScene(self):
+	def SLOT_addScene(self,place=0):
 	
 		index=self.selectionModel().currentIndex()
 		dist=index.distanceToRoot()
 	
 		if dist==DEPTH_SCENE-1:
-			row=index.row()+1
+			row=index.row()+1+place
 		else:
 			while dist<DEPTH_SCENE-1:
 				index=index.child(0,0)
@@ -171,6 +190,8 @@ class WWTreeView(QtGui.QTreeView):
 		# for i,column in enumerate(columnDataScene):
 			# itemScene.setData(i, column)
 
+	def SLOT_addSceneBefore(self):
+		self.SLOT_addScene(place=-1)
 	def SLOT_actionMoveObjectUp(self):
 		index=self.selectionModel().currentIndex()
 		row=index.row()
@@ -229,10 +250,13 @@ class WWTreeView(QtGui.QTreeView):
 		
 		object=self.model().getItem(index)
 		
-		if dist<=1: 
+		if dist<1: 
 			return False
-		elif len(self.model().getItem(index.parent()).children)==1 : 
-			return False		
+		elif len(self.model().getItem(index.parent()).children)==1 : #if we are the only child
+			# we try to delete the parent
+			self.setCurrentIndex (index.parent())
+			
+			return self.SLOT_removeObject()	
 
 		ans = QtGui.QMessageBox.question(self, "Delete Message", "Do you really want to delete the "+object.xml_name, QtGui.QMessageBox.Yes | QtGui.QMessageBox.No);
 		
@@ -289,7 +313,15 @@ class WWTreeView(QtGui.QTreeView):
 		self.emit(QtCore.SIGNAL("activated(const QModelIndex & )"),  index)
 		
 		
-		
+	def getIndex(self,item):
+		if item==self.model().story:
+			return self.rootIndex ()
+		else:
+			parentItem=item.parent
+			parentIndex=self.getIndex(parentItem)
+			index=self.model().index(item.number_in_brotherhood(),0,parentIndex)
+			return index
+			
 		
 		
 		
@@ -335,10 +367,7 @@ class WWTreeModel (QtCore.QAbstractItemModel):
 		try:
 			childItem = parentItem.children[row]
 		except IndexError,e:
-			if parent !=None:
-				print "parent.object.title  :  ",self.getItem(parent).object.title
-			print "row  :  ",row
-			raise(e)
+			return QtCore.QModelIndex()
 		if (childItem):
 			return self.createIndex(row, column, childItem)
 		else :
@@ -390,6 +419,18 @@ class WWTreeModel (QtCore.QAbstractItemModel):
 		if parent==None :				
 			parent=QtCore.QModelIndex()	
 		parentItem = self.getItem(parent)
+		
+		# ## removes childrens' children
+		# for r in range(position,position+rows):
+			# childIndex = parent.child(r,0)
+			# childItem = self.getItem(childIndex)
+			# if len(childItem.children)!=0:
+				# print "WWWWW"
+				# # self.removeRows(0,len(childItem.children),childIndex)
+		
+		## removes children
+		if rows==len(parentItem.children): last=position + rows 
+		else: last=position + rows - 1
 		self.beginRemoveRows(parent, position, position + rows - 1)
 		removed = parentItem.removeChildren(position, rows)
 		self.endRemoveRows()
@@ -423,6 +464,8 @@ class WWTreeModel (QtCore.QAbstractItemModel):
 				return item
 		
 		return self.story
+		
+
 			
 	def nextIndex(self,index,with_children=True):
 		# This function get the next index that comes after the one in entry:
