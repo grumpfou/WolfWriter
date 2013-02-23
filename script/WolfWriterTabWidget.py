@@ -115,7 +115,7 @@ class WWSearchPanel( QtGui.QWidget):
 	
 	def SLOT_search(self):
 		if self.main_window!=None:
-			self.main_window.textEdit.uploadScene()
+			self.main_window.sceneEdit.uploadScene()
 		pattern=unicode(self.search_line.text())
 		if pattern==u"": return False
 		regexp=self.regexp_checkbox.isChecked()
@@ -130,12 +130,12 @@ class WWSearchPanel( QtGui.QWidget):
 			return False
 		result=self.results_list[self.listWidget.row(item)]
 		self.main_window.SLOT_objectActivated(result[2])
-		cursor=QtGui.QTextCursor(self.main_window.textEdit.document())
+		cursor=QtGui.QTextCursor(self.main_window.sceneEdit.document())
 		cursor.setPosition(result[0].start())
 		cursor.setPosition(result[0].end(),QtGui.QTextCursor.KeepAnchor)
 		
-		self.main_window.textEdit.setTextCursor(cursor)
-		self.main_window.textEdit.setFocus ()
+		self.main_window.sceneEdit.setTextCursor(cursor)
+		self.main_window.sceneEdit.setFocus ()
 		return True
 	
 	def display_results_list(self):

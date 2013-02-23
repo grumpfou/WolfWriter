@@ -3,6 +3,7 @@
 from PyQt4 import QtGui, QtCore
 from WolfWriterCommon import *
 from WolfWriterBook import *
+from WolfWriterScene import *
 # from WolfWriterChapterScene import *
 import sys
 import string
@@ -78,7 +79,6 @@ class WWTreeView(QtGui.QTreeView):
 		self.connect(self.actionAddSceneBefore, QtCore.SIGNAL("triggered()"), self.SLOT_addSceneBefore )
 		
 		
-		
 		self.actionMoveObjectUp=QtGui.QAction("&Move object up",self)
 		self.actionMoveObjectUp.setShortcuts(QtGui.QKeySequence("Ctrl+Up"))
 		self.actionMoveObjectUp.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"1uparrow.png")))
@@ -91,6 +91,11 @@ class WWTreeView(QtGui.QTreeView):
 		self.addAction(self.actionMoveObjectDown)
 		self.connect(self.actionMoveObjectDown, QtCore.SIGNAL("triggered()"), self.SLOT_actionMoveObjectDown )
 
+		self.actionChangeTitleObject=QtGui.QAction("&Change object's title",self)
+		self.addAction(self.actionChangeTitleObject)
+		self.actionChangeTitleObject.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"applixware.png")))
+		self.connect(self.actionChangeTitleObject, QtCore.SIGNAL("triggered()"), self.SLOT_changeTitleObject )		
+		
 		self.actionRemoveObject=QtGui.QAction("&Remove the selected object",self)
 		self.actionRemoveObject.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"del_object.png")))
 		self.actionRemoveObject.setShortcuts(QtGui.QKeySequence.Delete)
@@ -278,7 +283,18 @@ class WWTreeView(QtGui.QTreeView):
 	def SLOT_emitChanged(self):
 		self.emit(QtCore.SIGNAL("changed ()"))
 	
-		
+	def SLOT_changeTitleObject(self):
+		index=self.selectionModel().currentIndex()
+		item=self.model().getItem(index)
+		if isinstance(item,WWScene):
+			question="What is the new scene's title?"
+		elif isinstance(item,WWChapter):
+			question="What is the new chapter's title?"
+		newname=QtGui.QInputDialog.getText(self, "New title", question)
+		if newname[1]:
+			item.changeTitle(unicode(newname[0]))
+			self.SLOT_emitChanged()
+
 	# def SLOT_actionRefresh(self):
 		# self.model().refresh_all()
 		

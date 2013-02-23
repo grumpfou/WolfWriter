@@ -108,8 +108,8 @@ class WWEncyPage(QtGui.QWidget):
 		
 		if self.parent_panel!=None:
 			self.parent_panel.encyclopedia.fillingWordSet()
-			self.parent_panel.main_window.textEdit.highlighter.reload_word_set()
-			self.parent_panel.main_window.textEdit.highlighter.rehighlight()
+			self.parent_panel.main_window.textScene.highlighter.reload_word_set()
+			self.parent_panel.main_window.textScene.highlighter.rehighlight()
 		self.SLOT_emitChanged()
 	
 	def SLOT_emitChanged(self):

@@ -84,6 +84,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		# Action of deleting a scene
 		self.actionDeleteScene      = QtGui.QAction("&Delete the active Scene",self)
 		
+		
 		# Action of charging anothter config file #!Not stable!#
 		self.actionOpenConfig		= QtGui.QAction("&Open Config File",self)
 		
@@ -100,7 +101,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		self.connect(self.actionSaveArchive		, QtCore.SIGNAL("triggered()"), self.SLOT_actionSaveArchive)
 		self.connect(self.actionExportBook		, QtCore.SIGNAL("triggered()"), self.SLOT_actionExportBook)
 		self.connect(self.actionChangeMetadata	, QtCore.SIGNAL("triggered()"), self.SLOT_actionChangeMetadata)
-		self.connect(self.lineEditScene			, QtCore.SIGNAL('returnPressed()'), self.SLOT_changeSceneTitle)
+		# self.connect(self.lineEditScene			, QtCore.SIGNAL('returnPressed()'), self.SLOT_changeSceneTitle)
 		self.connect(self.actionOpenConfig		, QtCore.SIGNAL('triggered()'), self.SLOT_actionOpenConfig)
 		self.connect(self.actionAddChapter		, QtCore.SIGNAL('triggered()'), self.SLOT_actionAddChapter)
 		self.connect(self.actionDeleteChapter	, QtCore.SIGNAL('triggered()'), self.SLOT_actionDeleteChapter)
@@ -108,12 +109,13 @@ class WWMainWindow(QtGui.QMainWindow):
 		self.connect(self.actionDeleteScene		, QtCore.SIGNAL('triggered()'), self.SLOT_actionDeleteScene)
 		self.connect(self.actionSendToAntidote	, QtCore.SIGNAL('triggered()'), self.SLOT_actionSendToAntidote)
 		
+		# self.connect(self.buttonSetSelectedScene, QtCore.SIGNAL('clicked()'), self.SLOT_actionSelectScene)
 		self.connect(self.buttonPrevScene	, QtCore.SIGNAL('clicked()'), self.SLOT_buttonPrevScene)
 		self.connect(self.buttonNextScene	, QtCore.SIGNAL('clicked()'), self.SLOT_buttonNextScene)
 		
 		
 		self.connect(self.treeView,QtCore.SIGNAL('changed  ()'), self.SLOT_somethingChanged)
-		self.connect(self.textEdit,QtCore.SIGNAL('textChanged ()'), self.SLOT_somethingChanged)
+		self.connect(self.sceneEdit,QtCore.SIGNAL('textChanged ()'), self.SLOT_somethingChanged)
 		self.connect(self.tab_widget,QtCore.SIGNAL('changed  ()'), self.SLOT_somethingChanged)
 
 	def setup_mainLayout(self):
@@ -131,8 +133,18 @@ class WWMainWindow(QtGui.QMainWindow):
 		def setup_centerLayout(widget):
 			self.centerLayout=QtGui.QVBoxLayout(widget)
 			# self.lineEditChapter=QtGui.QLineEdit(self)
-			self.lineEditScene=QtGui.QLineEdit(self)
-			self.textEdit=WWSceneEdit(parent=self,main_window=self)
+			# head_widget=QtGui.QWidget()
+			# layout_head=QtGui.QHBoxLayout()
+			# self.lineEditScene=QtGui.QLineEdit(self)
+			# self.buttonSetSelectedScene=QtGui.QPushButton("	")
+			# self.buttonSetSelectedScene.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"2leftarrow.png")))
+			# layout_head.addWidget(self.buttonSetSelectedScene)
+			# layout_head.addWidget(self.lineEditScene)
+			# head_widget.setLayout(layout_head)
+			self.labelChapter = QtGui.QLabel()
+			self.labelScene  = QtGui.QLabel()
+			
+			self.sceneEdit=WWSceneEdit(parent=self,main_window=self)
 			
 			bottom_widget=QtGui.QWidget()
 			layout_bottom=QtGui.QHBoxLayout()
@@ -145,8 +157,10 @@ class WWMainWindow(QtGui.QMainWindow):
 			bottom_widget.setLayout(layout_bottom)
 			
 			# self.rightLayout.addWidget( self.lineEditChapter )
-			self.centerLayout.addWidget( self.lineEditScene )
-			self.centerLayout.addWidget( self.textEdit )
+			
+			self.centerLayout.addWidget( self.labelChapter )
+			self.centerLayout.addWidget( self.labelScene   )
+			self.centerLayout.addWidget( self.sceneEdit )
 			self.centerLayout.addWidget( bottom_widget )
 			widget.setLayout ( self.centerLayout )
 			# policy=QtGui.QSizePolicy (  )
@@ -269,7 +283,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		dialog= QtGui.QFileDialog(self)
 		filepath = dialog.getSaveFileName(self,"Select a archive where to save",self.get_default_opening_saving_site())
 		if filepath:
-			self.textEdit.uploadScene()
+			self.sceneEdit.uploadScene()
 			filepath=unicode(filepath)
 			old_archivepath=self.book.archivepath
 			self.book.save_book(filepath=filepath)
@@ -285,7 +299,7 @@ class WWMainWindow(QtGui.QMainWindow):
 			self.SLOT_actionSaveAsBook()
 			
 		else:
-			self.textEdit.uploadScene()
+			self.sceneEdit.uploadScene()
 			self.book.save_book()
 			self.actionSaveBook.setEnabled(False)
 			self.setWindowTitle ( unicode("WolfWriter : ")+ self.book.structure.project_name)
@@ -293,7 +307,7 @@ class WWMainWindow(QtGui.QMainWindow):
 	def SLOT_actionSaveArchive(self):
 		# An archive is put in the zip file under the directory containg the date in the format
 		# YYYYMMDDHHMMSS. It allows the user to keep an old version of it's work.
-		self.textEdit.uploadScene()
+		self.sceneEdit.uploadScene()
 		self.book.save_archive()
 	
 		
@@ -302,7 +316,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		dialog= QtGui.QFileDialog(self)
 		filename = dialog.getSaveFileName(self,"Select a directory where to save",self.get_default_opening_saving_site()) #only txt for now
 		if filename:
-			self.textEdit.uploadScene()
+			self.sceneEdit.uploadScene()
 			self.book.save_txt(filename)
 				
 		
@@ -312,31 +326,33 @@ class WWMainWindow(QtGui.QMainWindow):
 		# - if it is the scene it is openning it in the WWSceneEdit
 		
 		if isinstance(object,WWScene):
-			self.lineEditScene.setText(object.title)
-			self.textEdit.setScene(object,self.book)
-		elif isinstance(object,WWChapter):
-			newname=QtGui.QInputDialog.getText(self, "Nouveau titre de chapitre", "Quel est le nouveau titre du chapitre ?")
-			if newname[1]:
-				object.changeTitle(unicode(newname[0]))
-				## TODO refresh the tree
-				self.SLOT_somethingChanged()
-		elif isinstance(object,WWStory):
-			newname=QtGui.QInputDialog.getText(self, "Nouveau titre de chapitre", "Quel est le nouveau titre de l'histoire ?")
-			if newname[1]:
-				object.changeTitle(unicode(newname[0]))
-				## TODO refresh the tree
-				self.SLOT_somethingChanged()
+			self.labelChapter.setText(object.parent.getInfo("title"))
+			self.labelScene.setText("\t"+object.getInfo("title"))
+			self.sceneEdit.setScene(object,self.book)
+		# elif isinstance(object,WWChapter):
+			# self.tree
+			# newname=QtGui.QInputDialog.getText(self, "Nouveau titre de chapitre", "Quel est le nouveau titre du chapitre ?")
+			# if newname[1]:
+				# object.changeTitle(unicode(newname[0]))
+				# ## TODO refresh the tree
+				# self.SLOT_somethingChanged()
+		# elif isinstance(object,WWStory):
+			# newname=QtGui.QInputDialog.getText(self, "Nouveau titre de chapitre", "Quel est le nouveau titre de l'histoire ?")
+			# if newname[1]:
+				# object.changeTitle(unicode(newname[0]))
+				# ## TODO refresh the tree
+				# self.SLOT_somethingChanged()
 	
-	def SLOT_changeSceneTitle(self):
-		# is called when Enter is pressed in the lineEditScene : 
-		# it changes the title of the scene
-		if self.textEdit.scene!=None:
-			newTitle=unicode(self.lineEditScene.text())	
-			if newTitle!=self.textEdit.scene.title:
-				self.textEdit.scene.title=newTitle
-				# self.treeView.SLOT_actionRefresh()
-				## TODO refresh the tree
-				self.SLOT_somethingChanged()
+	# def SLOT_changeSceneTitle(self):
+		# # is called when Enter is pressed in the lineEditScene : 
+		# # it changes the title of the scene
+		# if self.sceneEdit.scene!=None:
+			# newTitle=unicode(self.lineEditScene.text())	
+			# if newTitle!=self.sceneEdit.scene.title:
+				# self.sceneEdit.scene.title=newTitle
+				# # self.treeView.SLOT_actionRefresh()
+				# ## TODO refresh the tree
+				# self.SLOT_somethingChanged()
 		
 	def SLOT_actionChangeMetadata(self):
 		# The metadata are the author, the name of the project etc.
@@ -361,11 +377,14 @@ class WWMainWindow(QtGui.QMainWindow):
 		self.treeView.SLOT_addScene()
 		self.SLOT_somethingChanged()
 	def SLOT_actionDeleteScene      (self):
-		if self.textEdit.scene!=None:
-			index=self.treeView.getIndex(self.textEdit.scene)
+		if self.sceneEdit.scene!=None:
+			index=self.treeView.getIndex(self.sceneEdit.scene)
 			self.treeView.setCurrentIndex(index)
 			self.treeView.SLOT_removeObject()
-			
+	def SLOT_actionSelectScene(self):
+		if self.sceneEdit.scene!=None:
+			index=self.treeView.getIndex(self.sceneEdit.scene)
+			self.treeView.setCurrentIndex(index)
 			
 	def SLOT_actionSendToAntidote (self):
 		# Send the scene to another software (mine is called Antidote and accept only a certain type of encoding).
@@ -373,9 +392,9 @@ class WWMainWindow(QtGui.QMainWindow):
 		if path=="":
 			QtGui.QMessageBox.information(self, "Antidote Sender", "Sorry, there is no path to the Antidote software in the configuration file.")
 			return False
-		if self.textEdit.scene!=None:
-			self.textEdit.uploadScene()
-			text=self.textEdit.scene.txt_output()
+		if self.sceneEdit.scene!=None:
+			self.sceneEdit.uploadScene()
+			text=self.sceneEdit.scene.txt_output()
 			i=0
 			while TMP_FILE_MARK+"tmp"+str(i).zfill(CONSTANTS.MAX_ZFILL)+'.txt' in os.listdir('.'):
 				i+=1
@@ -393,8 +412,8 @@ class WWMainWindow(QtGui.QMainWindow):
 				fichier = codecs.open(name, encoding='utf-8-sig', mode='rb')
 				try :
 					text=fichier.read()
-					self.textEdit.setText(text)
-					self.textEdit.uploadScene()
+					self.sceneEdit.setText(text)
+					self.sceneEdit.uploadScene()
 				finally:
 					fichier.close()
 		
@@ -407,7 +426,7 @@ class WWMainWindow(QtGui.QMainWindow):
 			try:
 				WWReadConfigFile(pathway=filename)
 				self.path_configFile=filename
-				self.textEdit.putDefaultText()
+				self.sceneEdit.putDefaultText()
 			except Exception,e:
 				raise e
 			return True

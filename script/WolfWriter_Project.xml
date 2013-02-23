@@ -1,7 +1,6 @@
 <NotepadPlus>
     <Project name="WolfWriter">
         <File name="WolfWriterCommon.py" />
-        <File name="WolfWriterConstants.py" />
         <File name="WolfWriterError.py" />
         <File name="WolfWriterTest.py" />
         <Folder name="WWGui">
@@ -20,6 +19,7 @@
             <File name="WolfWriterReadConfigFile.py" />
             <File name="WolfWriterNodeXML.py" />
             <File name="WolfWriterWord.py" />
+            <File name="WolfWriterConstants.py" />
         </Folder>
     </Project>
 </NotepadPlus>
