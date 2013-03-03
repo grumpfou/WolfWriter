@@ -6,3 +6,4 @@ EXTERNAL_SOFT_PATH : "C:\Program Files (x86)\Druide\Antidote 7\Programmes32\anti
 LINE_HEIGHT : 150
 
 DLT_OPEN_SAVE_SITE : ~\Documents\
+

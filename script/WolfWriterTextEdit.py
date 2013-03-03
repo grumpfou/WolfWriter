@@ -7,6 +7,7 @@ from WolfWriterCommon import *
 from WolfWriterLanguages import *
 from WolfWriterReadConfigFile import *
 from WolfWriterHighlighter import *
+from WolfWriterCharTable import *
 # from WolfWriterEncyPage import *
 
 """
@@ -151,17 +152,22 @@ class WWTextEdit(QtGui.QTextEdit):
 			if res:
 				self.highlighter.reload_word_set()
 				self.highlighter.rehighlight()
+		
+	
 		menu=self.createStandardContextMenu()
 		if self.book!=None and CONSTANTS.WITH_HIGHLIGHTER:
 			if self.book.encyclopedia.word_set.isIn (word):
 				actionRemoveWordEncyclopedia=QtGui.QAction("&Remove the word from Ency",self)
 				self.connect(actionRemoveWordEncyclopedia, QtCore.SIGNAL("triggered()"), removeWord)
 				menu.addAction(actionRemoveWordEncyclopedia)
-			else:	
-			
+			else:				
 				actionAddWordEncyclopedia=QtGui.QAction("&Add the word to Ency",self)
 				self.connect(actionAddWordEncyclopedia, QtCore.SIGNAL("triggered()"), addWord)
 				menu.addAction(actionAddWordEncyclopedia)
+				
+				actionLaunchCharWidgetTable=QtGui.QAction("&Special Characters",self)
+				self.connect(actionLaunchCharWidgetTable, QtCore.SIGNAL("triggered()"), self.launchCharWidgetTable)
+				menu.addAction(actionLaunchCharWidgetTable)
 			
 		menu.exec_(event.globalPos())
 		
@@ -206,6 +212,8 @@ class WWTextEdit(QtGui.QTextEdit):
 		
 		
 	####################################################################
+	
+
 	def insertFromMimeData(self,source ):
 		self.blockSignals (True)		
 		text=source.text()
@@ -223,7 +231,11 @@ class WWTextEdit(QtGui.QTextEdit):
 			self.highlighter.rehighlight()
 		self.blockSignals (False)
 		
-	
+	def launchCharWidgetTable(self):
+			charWid=WWCharWidgetTable(linked_text_widget=self,parent=self,flags = QtCore.Qt.Tool)#, flag = QtCore.Qt.Dialog)
+			rect=self.cursorRect()
+			charWid.move(self.mapToGlobal (rect.bottomRight ()))
+			charWid.show()
 		
 class WWSceneEdit(WWTextEdit):
 	def __init__(self,parent,scene=None,book=None,main_window=None):
@@ -259,7 +271,8 @@ class WWSceneEdit(WWTextEdit):
 		
 if __name__ == '__main__':
 	from WolfWriterBook import *
-	pp="C:/Users/Renaud/Documents/Programmation/Python/Writing_help/WolfWriter/Test/testa.zip"
+	from WolfWriterCharTable import *
+	pp="C:\\Users\\Renaud\\Documents\\Programmation\\Python\\WolfWriter_Test\\TestPerso\\testa.zip"
 	
 	
 	bk=WWBook(archivepath=pp)
@@ -270,12 +283,25 @@ if __name__ == '__main__':
 	button= QtGui.QPushButton('ATGC')
 	# button.setAction(textedit.action)
 	
-	text_edit1=QtGui.QTextEdit()
+	# text_edit1=QtGui.QTextEdit()
 	layout=QtGui.QHBoxLayout()
 	layout.addWidget(textedit)
 	layout.addWidget(button)
 	def toto():
-		textedit.setScene(newscene=bk.structure.story.list_chapters[0].children[0],book=bk)
+		# dialog=QtGui.QDialog(parent=textedit)
+		# layout=QtGui.QVBoxLayout()
+		# layout.addWidget(WWCharWidgetTable(linked_text_widget=textedit))
+		# dialog.setLayout(layout)
+		# dialog.show()
+		charWid=WWCharWidgetTable(linked_text_widget=textedit,parent=textedit,flags = QtCore.Qt.Tool)#, flag = QtCore.Qt.Dialog)
+		rect=textedit.cursorRect()
+		rect1=textedit.geometry()
+		print "rect1.topLeft()  :  ",rect1.topLeft()
+		print "rect.bottomRight ()  :  ",rect.bottomRight ()
+		# charWid.exec_(textedit.mapToGlobal (rect.bottomRight ()))
+		charWid.move(textedit.mapToGlobal (rect.bottomRight ()))
+		charWid.show()
+		
 	app.connect(button, QtCore.SIGNAL("clicked()"), toto)
 	# app.connect(button, QtCore.SIGNAL("clicked()"), textedit.action)
 	wid=QtGui.QWidget()

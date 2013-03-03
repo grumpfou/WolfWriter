@@ -290,9 +290,9 @@ class WWTreeView(QtGui.QTreeView):
 			question="What is the new scene's title?"
 		elif isinstance(item,WWChapter):
 			question="What is the new chapter's title?"
-		newname=QtGui.QInputDialog.getText(self, "New title", question)
+		newname=QtGui.QInputDialog.getText(self, "New title", question,text=item.title)
 		if newname[1]:
-			item.changeTitle(unicode(newname[0]))
+			item.title=unicode(newname[0])
 			self.SLOT_emitChanged()
 
 	# def SLOT_actionRefresh(self):
