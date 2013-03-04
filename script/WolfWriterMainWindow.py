@@ -141,10 +141,23 @@ class WWMainWindow(QtGui.QMainWindow):
 			# layout_head.addWidget(self.buttonSetSelectedScene)
 			# layout_head.addWidget(self.lineEditScene)
 			# head_widget.setLayout(layout_head)
+			top_widget=QtGui.QWidget()
+			layout_top=QtGui.QHBoxLayout()
+			
+			top_left_widget=QtGui.QWidget()
+			layout_top_left=QtGui.QVBoxLayout()
 			self.labelChapter = QtGui.QLabel()
 			self.labelScene  = QtGui.QLabel()
-			
+			layout_top_left.addWidget( self.labelChapter )
+			layout_top_left.addWidget( self.labelScene   )
+			top_left_widget.setLayout(layout_top_left)
+						
 			self.sceneEdit=WWSceneEdit(parent=self,main_window=self)
+			toolBar=self.sceneEdit.getToolBar(self)
+			
+			layout_top.addWidget(top_left_widget)
+			layout_top.addWidget(toolBar)
+			top_widget.setLayout(layout_top)
 			
 			bottom_widget=QtGui.QWidget()
 			layout_bottom=QtGui.QHBoxLayout()
@@ -152,14 +165,15 @@ class WWMainWindow(QtGui.QMainWindow):
 			self.buttonPrevScene.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"back.png")))
 			self.buttonNextScene = QtGui.QPushButton("&Next Scene")
 			self.buttonNextScene.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"forward.png")))
+			
 			layout_bottom.addWidget(self.buttonPrevScene)
 			layout_bottom.addWidget(self.buttonNextScene)
 			bottom_widget.setLayout(layout_bottom)
 			
 			# self.rightLayout.addWidget( self.lineEditChapter )
 			
-			self.centerLayout.addWidget( self.labelChapter )
-			self.centerLayout.addWidget( self.labelScene   )
+			
+			self.centerLayout.addWidget( top_widget )
 			self.centerLayout.addWidget( self.sceneEdit )
 			self.centerLayout.addWidget( bottom_widget )
 			widget.setLayout ( self.centerLayout )

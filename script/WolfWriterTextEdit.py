@@ -65,7 +65,12 @@ class WWTextEdit(QtGui.QTextEdit):
 			
 			self.dico_pluggins[i]=dico[k]
 			mapper.setMapping(short, i)
-			
+		
+		
+		self.actionLaunchCharWidgetTable=QtGui.QAction("&Special Characters",self)
+		
+		self.actionLaunchCharWidgetTable.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"applixware.png")))
+		self.connect(self.actionLaunchCharWidgetTable, QtCore.SIGNAL("triggered()"), self.launchCharWidgetTable)
 		self.connect(mapper, QtCore.SIGNAL("mapped(int)"), self.SLOT_pluggins )
 		
 		
@@ -165,9 +170,8 @@ class WWTextEdit(QtGui.QTextEdit):
 				self.connect(actionAddWordEncyclopedia, QtCore.SIGNAL("triggered()"), addWord)
 				menu.addAction(actionAddWordEncyclopedia)
 				
-				actionLaunchCharWidgetTable=QtGui.QAction("&Special Characters",self)
-				self.connect(actionLaunchCharWidgetTable, QtCore.SIGNAL("triggered()"), self.launchCharWidgetTable)
-				menu.addAction(actionLaunchCharWidgetTable)
+				
+				menu.addAction(self.actionLaunchCharWidgetTable)
 			
 		menu.exec_(event.globalPos())
 		
@@ -264,6 +268,37 @@ class WWSceneEdit(WWTextEdit):
 			self.setText(self.scene.text,book=book)
 		else:
 			self.setText(book=book)
+	
+	def getToolBar(self,parent=None):
+		actionCopy		= QtGui.QAction("Copy",self)
+		actionCopy.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"editcopy.png")))
+		self.connect(actionCopy, QtCore.SIGNAL("triggered()"), self.copy)
+		
+		actionCut		= QtGui.QAction("Cut",self)
+		actionCut.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"editcut.png")))
+		self.connect(actionCut, QtCore.SIGNAL("triggered()"), self.cut)
+		
+		actionPaste		= QtGui.QAction("Paste",self)
+		actionPaste.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"editpaste.png")))
+		self.connect(actionPaste, QtCore.SIGNAL("triggered()"), self.paste)
+		
+		actionUndo		= QtGui.QAction("Undo",self)
+		actionUndo.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"editundo.png")))
+		self.connect(actionUndo, QtCore.SIGNAL("triggered()"), self.undo)
+		
+		actionRedo		= QtGui.QAction("Redo",self)
+		actionRedo.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"editredo.png")))
+		self.connect(actionRedo, QtCore.SIGNAL("triggered()"), self.redo)
+		
+				
+		toolBar=QtGui.QToolBar ("ToolBar",parent)
+		toolBar.addAction(actionCopy)
+		toolBar.addAction(actionCut)		
+		toolBar.addAction(actionPaste)		
+		toolBar.addAction(actionUndo)		
+		toolBar.addAction(actionRedo)		
+		toolBar.addAction(self.actionLaunchCharWidgetTable)
+		return toolBar
 			
 		
 
@@ -292,15 +327,17 @@ if __name__ == '__main__':
 		# layout=QtGui.QVBoxLayout()
 		# layout.addWidget(WWCharWidgetTable(linked_text_widget=textedit))
 		# dialog.setLayout(layout)
-		# dialog.show()
-		charWid=WWCharWidgetTable(linked_text_widget=textedit,parent=textedit,flags = QtCore.Qt.Tool)#, flag = QtCore.Qt.Dialog)
-		rect=textedit.cursorRect()
-		rect1=textedit.geometry()
-		print "rect1.topLeft()  :  ",rect1.topLeft()
-		print "rect.bottomRight ()  :  ",rect.bottomRight ()
-		# charWid.exec_(textedit.mapToGlobal (rect.bottomRight ()))
-		charWid.move(textedit.mapToGlobal (rect.bottomRight ()))
-		charWid.show()
+		# # dialog.show()
+		# charWid=WWCharWidgetTable(linked_text_widget=textedit,parent=textedit,flags = QtCore.Qt.Tool)#, flag = QtCore.Qt.Dialog)
+		# rect=textedit.cursorRect()
+		# rect1=textedit.geometry()
+		# print "rect1.topLeft()  :  ",rect1.topLeft()
+		# print "rect.bottomRight ()  :  ",rect.bottomRight ()
+		# # charWid.exec_(textedit.mapToGlobal (rect.bottomRight ()))
+		# charWid.move(textedit.mapToGlobal (rect.bottomRight ()))
+		# charWid.show()
+		tb=textedit.getToolBar(textedit)
+		tb.show()
 		
 	app.connect(button, QtCore.SIGNAL("clicked()"), toto)
 	# app.connect(button, QtCore.SIGNAL("clicked()"), textedit.action)
