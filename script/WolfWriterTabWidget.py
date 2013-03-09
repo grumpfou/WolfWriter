@@ -93,9 +93,13 @@ class WWSearchPanel( QtGui.QWidget):
 		self.regexp_checkbox = QtGui.QCheckBox()
 		self.entireword_checkbox = QtGui.QCheckBox()
 		
-		self.listWidget=QtGui.QListWidget()
+		# self.listWidget=QtGui.QListWidget()
 		find_button = QtGui.QPushButton("&Find")
 		find_button.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"find.png")))
+		
+		self.tableResults = QtGui.QTableWidget(1,3)
+		self.tableResults.setHorizontalHeaderLabels([u"Chapter","Scene",u"Context"])
+		self.tableResults.setSelectionBehavior (QtGui.QAbstractItemView.SelectRows)
 		
 		
 		main_layout=QtGui.QFormLayout()
@@ -103,13 +107,15 @@ class WWSearchPanel( QtGui.QWidget):
 		main_layout.addRow(u"Casse sensitive",self.casse_checkbox)
 		main_layout.addRow(u"Regular expression",self.regexp_checkbox)
 		main_layout.addRow(u"Entire word",self.entireword_checkbox)
-		main_layout.addRow(self.listWidget)
+		# main_layout.addRow(self.listWidget)
+		main_layout.addRow(self.tableResults)
 		
 		self. setLayout ( main_layout )
 		
 		self.connect(find_button, QtCore.SIGNAL("clicked()"), self.SLOT_search)
 		self.connect(self.search_line, QtCore.SIGNAL('returnPressed  ()'), self.SLOT_search)
-		self.connect(self.listWidget,QtCore.SIGNAL('itemActivated ( QListWidgetItem *  )'), self.SLOT_activated)
+		# self.connect(self.listWidget,QtCore.SIGNAL('itemActivated ( QListWidgetItem *  )'), self.SLOT_activated)
+		self.connect(self.tableResults,QtCore.SIGNAL('itemActivated   ( QTableWidgetItem * )'), self.SLOT_activated)
 		
 		self.results_list=[]
 	
@@ -128,7 +134,7 @@ class WWSearchPanel( QtGui.QWidget):
 	def SLOT_activated(self,item):
 		if self.main_window==None:
 			return False
-		result=self.results_list[self.listWidget.row(item)]
+		result=self.results_list[self.tableResults.row(item)]
 		self.main_window.SLOT_objectActivated(result[2])
 		cursor=QtGui.QTextCursor(self.main_window.sceneEdit.document())
 		cursor.setPosition(result[0].start())
@@ -139,12 +145,32 @@ class WWSearchPanel( QtGui.QWidget):
 		return True
 	
 	def display_results_list(self):
-		self.listWidget.clear()
-		for res in self.results_list:
-			to_add=	u"..."+res[1]+u"... " + \
-					u" Chapter : "+ res[3].title +\
-					u" Scene : "+ res[2].title
-			self.listWidget.addItem(to_add)
+		self.tableResults.clearContents  ()	
+		# self.tableResults.setHorizontalHeaderLabels([u"Chapter","Scene",u"Context"])
+		# print "coucou000"
+		# print "self.results_list  :  ",self.results_list
+		self.tableResults.setRowCount(len(self.results_list))
+		for i,res in enumerate(self.results_list):
+			# print "coucou",i
+			
+			item_context = QtGui.QTableWidgetItem (unicode(u"..."+res[1]+u"... "))
+			item_chapter   = QtGui.QTableWidgetItem (unicode(res[3].getInfo('title')))
+			item_scene = QtGui.QTableWidgetItem (unicode(res[2].getInfo('title')))
+			# item.setTextAlignment (QtCore.Qt.AlignCenter)
+			item_chapter .setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+			item_scene   .setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+			item_context .setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable)
+			self.tableResults.setItem(i,0,item_chapter )
+			self.tableResults.setItem(i,1,item_scene   )
+			self.tableResults.setItem(i,2,item_context )
+		self.tableResults.resizeColumnsToContents()
+		
+		# print "self.tableResults.rowCount()  :  ",self.tableResults.columnCount()
+		# for res in self.results_list:
+			# to_add=	u"..."+res[1]+u"... " + \
+					# u" Chapter : "+ res[3].title +\
+					# u" Scene : "+ res[2].title
+			# self.listWidget.addItem(to_add)
 			
 class WWEncyPanel (QtGui.QWidget):
 	def __init__(self,encyclopedia,main_window=None,*args,**kargs):
@@ -315,7 +341,7 @@ class WWEncyPanel (QtGui.QWidget):
 
 if __name__ == '__main__':
 	app = QtGui.QApplication(sys.argv)
-	pp="C:/Users/Renaud/Documents/Programmation/Python/Writing_help/WolfWriter/Test/testa.zip"
+	pp="C:\\Users\\Renaud\\Documents\\Programmation\\Python\\WolfWriter_Test\\TestPerso\\testa.zip"
 	bk=WWBook(pp)
 	encyNavigator=WWEncyPanel(encyclopedia=bk.encyclopedia)
 	searchPanel=WWSearchPanel(bk)

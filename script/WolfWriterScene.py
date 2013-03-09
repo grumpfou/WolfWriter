@@ -71,12 +71,16 @@ class WWScene (WWNodeFirstAbstract):
 			return self.stats["numberWords"]
 		return 0
 	
-	def find(self,pattern,regexp=False,casse=False,entireword=False,contextdist=10):
+	def find(self,pattern,regexp=False,casse=False,entireword=False,contextdist=None):
+		if contextdist==None:
+			contextdist=CONSTANTS.SEARCH_CONTXT_DIST
+			print 'rr'
 		#return [res,context,scene[,chapter[,story]]]
 		if not regexp:
 			for c in [u'\\',u'.',u'^',u'$',u'*',u'+',u'?',u'{',u'}',u'[',u']',u'|',u'(',u')']:
 				pattern=pattern.replace(c,u'\\'+c)
 		if entireword:
+			print "entireword  :  ",entireword
 			pattern=u'\\b'+pattern+u'\\b'
 		args=[pattern,self.text]
 		
@@ -84,8 +88,10 @@ class WWScene (WWNodeFirstAbstract):
 			args+=[ re.IGNORECASE ]
 		
 		for it in re.finditer(*args):
+			print "max(0,it.start()-contextdist):min(len(self.text),it.end()+contextdist)  :  \n\t\t",max(0,it.start()-contextdist),min(len(self.text),it.end()+contextdist)
 			context=self.text[max(0,it.start()-contextdist):min(len(self.text),it.end()+contextdist)]
 			context=context.replace(u'\n',u' ')
+			print "context  :  ",context.encode('ascii','replace')
 			yield [it,context,self]
 		
 

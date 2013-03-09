@@ -16,7 +16,7 @@ from WolfWriterCommon import *
 Part of the WolfWriter project. Written by Renaud Dessalles
 Contains a reimplementation of the QMainWindow. It contains all the elements of the
 graphical interface of the software.
-the main window is divided in tree vertacal parts :
+the main window is divided in tree vertical parts :
 - the left layout shows the structure of the book as a tree. Mainly, it is a widget contained in
 	the WolfWriterTreeView.py file.
 - the center layout is concerning the scene which has been activated in the tree. It is mainly the
@@ -37,8 +37,8 @@ class WWMainWindow(QtGui.QMainWindow):
 		### Setups graphical objects ###
 		self.setup_actions()
 		self.book=book
-		self.setup_menuBar()
 		self.setup_mainLayout()
+		self.setup_menuBar()
 		
 		self.setup_connections()
 		
@@ -51,29 +51,37 @@ class WWMainWindow(QtGui.QMainWindow):
 		# Action of openning a new book
 		self.actionNewBook			= QtGui.QAction("&New book",self)
 		self.actionNewBook.setShortcuts(QtGui.QKeySequence.New)
+		self.actionNewBook.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"new.png")))
 		
 		# Action of openning a old book
 		self.actionOpenBook			= QtGui.QAction("&Open book",self)
 		self.actionOpenBook.setShortcuts(QtGui.QKeySequence.Open)
+		self.actionOpenBook.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"open.png")))
 		
 		# Action of saving the book as
 		self.actionSaveAsBook		= QtGui.QAction("Save book &as",self)
 		self.actionSaveAsBook.setShortcuts(QtGui.QKeySequence.SaveAs)
+		self.actionSaveAsBook.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"saveas.png")))
 		
 		# Action of saving the book 
 		self.actionSaveBook			= QtGui.QAction("&Save book",self)
 		self.actionSaveBook.setShortcuts(QtGui.QKeySequence.Save)
+		self.actionSaveBook.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"save.png")))
 		
 		# Action of saving an archive of the book.
 		# an archive is a version of the book save into the main book file.
 		# in further version of the software, it will allow to make some stats, reloading old version etc.
 		# for now, it is not really usefull
 		self.actionSaveArchive		= QtGui.QAction("&Save archive",self)
+		self.actionSaveArchive.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"db_add.png")))
 
 		# Action of exporting the book in another format (only .txt for now)
 		self.actionExportBook		= QtGui.QAction("&Export book",self)
+		self.actionExportBook.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"export.png")))
+		
 		# Action of Changing the metadata (author, title etc.)
 		self.actionChangeMetadata	= QtGui.QAction("&Change metadata",self)
+		self.actionChangeMetadata.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"metadata.png")))
 
 		# Action of adding a chapter to the structure
 		self.actionAddChapter		= QtGui.QAction("&Add a new Chapter",self)
@@ -142,21 +150,23 @@ class WWMainWindow(QtGui.QMainWindow):
 			# layout_head.addWidget(self.lineEditScene)
 			# head_widget.setLayout(layout_head)
 			top_widget=QtGui.QWidget()
-			layout_top=QtGui.QHBoxLayout()
+			layout_top=QtGui.QVBoxLayout()
 			
-			top_left_widget=QtGui.QWidget()
-			layout_top_left=QtGui.QVBoxLayout()
+			# top_left_widget=QtGui.QWidget()
+			# layout_top_left=QtGui.QVBoxLayout()
 			self.labelChapter = QtGui.QLabel()
 			self.labelScene  = QtGui.QLabel()
-			layout_top_left.addWidget( self.labelChapter )
-			layout_top_left.addWidget( self.labelScene   )
-			top_left_widget.setLayout(layout_top_left)
+			layout_top.addWidget( self.labelChapter )
+			layout_top.addWidget( self.labelScene   )
+			# layout_top_left.addWidget( self.labelChapter )
+			# layout_top_left.addWidget( self.labelScene   )
+			# top_left_widget.setLayout(layout_top_left)
 						
 			self.sceneEdit=WWSceneEdit(parent=self,main_window=self)
-			toolBar=self.sceneEdit.getToolBar(self)
+			# toolBar=self.sceneEdit.getToolBar(self)
 			
-			layout_top.addWidget(top_left_widget)
-			layout_top.addWidget(toolBar)
+			# layout_top.addWidget(top_left_widget)
+			# layout_top.addWidget(toolBar)
 			top_widget.setLayout(layout_top)
 			
 			bottom_widget=QtGui.QWidget()
@@ -217,6 +227,63 @@ class WWMainWindow(QtGui.QMainWindow):
 		
 		
 	def setup_menuBar(self):
+		menuFile		=self.menuBar().addMenu ( "File" )
+		menuStructure	=self.menuBar().addMenu ( "Structure" )
+		menuEditScene	=self.menuBar().addMenu ( "Edit Scene" )
+		menuOptions		=self.menuBar().addMenu ( "Options" )
+		menuAbout		=self.menuBar().addMenu ( "About" )
+		
+		def setupFile		():
+			menuFile.addAction(self.actionNewBook)
+			menuFile.addAction(self.actionOpenBook)
+			
+			menuFile.addSeparator ()
+			
+			menuFile.addAction(self.actionSaveBook)
+			self.actionSaveBook.setEnabled(False)
+			menuFile.addAction(self.actionSaveAsBook)
+			menuFile.addAction(self.actionExportBook)
+			
+			menuFile.addSeparator ()
+			# menuFile.addAction(self.actionQuit)       #TODO
+			
+			
+			
+			
+		def setupStructure	():
+			menuStructure.addAction(self.actionSaveArchive)
+			menuStructure.addAction(self.actionChangeMetadata)
+			
+			menuStructure.addSeparator ()
+			menuStructure.addAction(self.actionAddChapter   )
+			menuStructure.addAction(self.actionDeleteChapter)	
+			# menuStructure.addAction(self.actionChangeChapterTitle)	#TODO
+			
+			menuStructure.addSeparator ()
+			menuStructure.addAction(self.actionAddScene)
+			menuStructure.addAction(self.actionDeleteScene)
+			# menuStructure.addAction(self.actionChangeSceneTitle)	#TODO
+			
+		def setupEditScene	():
+			for action in self.sceneEdit.getEditActions():
+				menuEditScene.addAction(action)
+			menuEditScene.addAction(self.sceneEdit.actionLaunchCharWidgetTable)
+			menuEditScene.addAction(self.actionSendToAntidote) #TODO : transfert to Scene and change name
+			# menuEditScene.addAction(self.sceneEdit.actionRecheackTypography)	#TODO
+			
+		def setupOptions	():	
+			menuOptions.addAction(self.actionOpenConfig)
+		def setupAbout		():
+			#TODO About widget
+			pass
+		
+		
+		setupFile		()
+		setupStructure	()
+		setupEditScene	()
+		setupOptions	()
+		setupAbout		()
+		"""
 		menuFile=self.menuBar().addMenu ( "File" )
 		menuChapter=self.menuBar().addMenu ( "Chapter" )
 		menuScene=self.menuBar().addMenu ( "Scene" )
@@ -248,7 +315,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		setup_chapter()
 		setup_scene()
 		setup_options()
-		
+		"""
 		
 		
 	################### SLOTS ###################

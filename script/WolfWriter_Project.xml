@@ -11,6 +11,7 @@
             <File name="WolfWriterTabWidget.py" />
             <File name="WolfWriterEncyPage.py" />
             <File name="WolfWriterLanguages.py" />
+            <File name="WolfWriterCharTable.py" />
         </Folder>
         <Folder name="WWCore">
             <File name="WolfWriterBook.py" />

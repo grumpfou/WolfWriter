@@ -38,6 +38,7 @@ class WWConstants:
 			"NAMEGEN_DFT_LEN"		: ( int			  ,	5			),
 			"NAMEGEN_RANGE_NUMBER"	: ( [int]		  ,	[0,100]		),
 			"NAMEGEN_DFT_NUMBER"	: ( int			  ,	10			),
+			"SEARCH_CONTXT_DIST"	: ( int			  , 20			),
 			"MAX_ZFILL"				: ( int			  ,	4			),
 			"EXTERNAL_SOFT_PATH"	: ( unicode		  ,	""			),
 			"LINE_HEIGHT"			: ( float		  , 100			),
