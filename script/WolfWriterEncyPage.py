@@ -97,7 +97,6 @@ class WWEncyPage(QtGui.QWidget):
 		
 		self.connect(cancel, QtCore.SIGNAL("clicked()"), self.start)
 		self.connect(apply, QtCore.SIGNAL("clicked()"), self.apply)
-		print "COucou"
 
 	def apply(self):
 		self.entry.name=unicode(self.name_choose.text())
@@ -108,8 +107,8 @@ class WWEncyPage(QtGui.QWidget):
 		
 		if self.parent_panel!=None:
 			self.parent_panel.encyclopedia.fillingWordSet()
-			self.parent_panel.main_window.textScene.highlighter.reload_word_set()
-			self.parent_panel.main_window.textScene.highlighter.rehighlight()
+			self.parent_panel.main_window.sceneEdit.highlighter.reload_word_set()
+			self.parent_panel.main_window.sceneEdit.highlighter.rehighlight()
 		self.SLOT_emitChanged()
 	
 	def SLOT_emitChanged(self):

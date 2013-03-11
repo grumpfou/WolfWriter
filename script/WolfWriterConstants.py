@@ -42,8 +42,10 @@ class WWConstants:
 			"MAX_ZFILL"				: ( int			  ,	4			),
 			"EXTERNAL_SOFT_PATH"	: ( unicode		  ,	""			),
 			"LINE_HEIGHT"			: ( float		  , 100			),
+			"TIME_STATUS_MESSAGE"	: ( int			  , 3000		),
 			"RECHECK_SCENE_OPEN"	: ( bool		  , False		),
 			"DELETE_TEMP_FILES"		: ( bool		  , True		),
+			"ENCY_TAB_APPLY"		: ( bool		  , True		),
 			"DLT_OPEN_SAVE_SITE"	: ( unicode		  , "~"			)
 			}
 		for key in self.all_constants.keys():

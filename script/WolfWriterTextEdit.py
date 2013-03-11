@@ -113,6 +113,7 @@ class WWTextEdit(QtGui.QTextEdit):
 			
 	def SLOT_cursorPositionChanged(self):
 		self.blockSignals (True)
+		
 		if self.old_cursor_position>=self.document().characterCount(): #if we were at the end of the 
 			self.old_cursor_position=self.textCursor().position()
 			self.blockSignals (False)
@@ -122,7 +123,9 @@ class WWTextEdit(QtGui.QTextEdit):
 			cursor=QtGui.QTextCursor(self.document())
 			cursor.clearSelection()
 			cursor.setPosition(self.old_cursor_position)
-			Language.correct_between_chars(cursor)
+			res=Language.correct_between_chars(cursor)
+			if res and self.main_window!=None:
+				self.main_window.changeMessageStatusBar("Correction : "+res[0].title)
 			
 		if CONSTANTS.AUTO_CORRECTION:
 			cursor=self.textCursor()
@@ -240,6 +243,9 @@ class WWTextEdit(QtGui.QTextEdit):
 			rect=self.cursorRect()
 			charWid.move(self.mapToGlobal (rect.bottomRight ()))
 			charWid.show()
+	
+	def afterCorrection(self,rule,pos):
+		pass
 		
 class WWSceneEdit(WWTextEdit):
 	def __init__(self,parent,scene=None,book=None,main_window=None):
@@ -247,6 +253,7 @@ class WWSceneEdit(WWTextEdit):
 		self.scene=None
 		self.book=None
 		self.setScene(scene,book)
+		
 	
 	def uploadScene(self):
 		if self.scene!=None:
@@ -261,7 +268,9 @@ class WWSceneEdit(WWTextEdit):
 	
 	def setScene(self,newscene,book=None):
 		self.uploadScene()
-
+		# self.emit(QtCore.SIGNAL("correction1 (  )"))
+		# self.afterCorrection(0,0)
+		
 		self.scene=newscene
 
 		if self.scene!=None:
@@ -269,6 +278,9 @@ class WWSceneEdit(WWTextEdit):
 		else:
 			self.setText(book=book)
 	
+	# def afterCorrection(self,rule,pos):
+		# self.main_window.SLOT_messageStatusBar(rule.title)
+		
 	# def getToolBar(self,parent=None):
 		# actionCopy		= QtGui.QAction("Copy",self)
 		# actionCopy.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"editcopy.png")))
@@ -343,7 +355,6 @@ class WWSceneEdit(WWTextEdit):
 		# return toolBar
 			
 		
-
 
 		
 if __name__ == '__main__':

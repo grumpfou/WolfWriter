@@ -43,8 +43,8 @@ class WWMainWindow(QtGui.QMainWindow):
 		self.setup_connections()
 		
 		self.reload_pannels()
-		
-		
+		# self.statusBar().showMessage("Bonjour !!!")
+		self.changeMessageStatusBar() #to initiate the status bar
 		# self.sceneActive=None
 		
 	def setup_actions(self):
@@ -116,6 +116,9 @@ class WWMainWindow(QtGui.QMainWindow):
 		self.connect(self.actionAddScene		, QtCore.SIGNAL('triggered()'), self.SLOT_actionAddScene)
 		self.connect(self.actionDeleteScene		, QtCore.SIGNAL('triggered()'), self.SLOT_actionDeleteScene)
 		self.connect(self.actionSendToAntidote	, QtCore.SIGNAL('triggered()'), self.SLOT_actionSendToAntidote)
+		# self.connect(self.treeView				, QtCore.SIGNAL('correction (PyQt_PyObject,int)'), self.SLOT_messageStatusBar)
+		# self.connect(self.sceneEdit				, QtCore.SIGNAL("correction1 (  )"), self.SLOT_messageStatusBar)
+		
 		
 		# self.connect(self.buttonSetSelectedScene, QtCore.SIGNAL('clicked()'), self.SLOT_actionSelectScene)
 		self.connect(self.buttonPrevScene	, QtCore.SIGNAL('clicked()'), self.SLOT_buttonPrevScene)
@@ -356,6 +359,7 @@ class WWMainWindow(QtGui.QMainWindow):
 			self.book=WWBook(archivepath=filename)
 			# self.treeView.setStory(self.book.structure.story)
 			self.reload_pannels()
+			self.changeMessageStatusBar("Book : Has openned "+filename)
 			return True
 			
 		return False
@@ -374,6 +378,7 @@ class WWMainWindow(QtGui.QMainWindow):
 			
 			if CONSTANTS.DELETE_TEMP_FILES and self.book.archivepath!=None: #if we have to delete the temporary files and if the book is not a new one
 				self.book.del_files(dirname)
+			self.changeMessageStatusBar("Book : Has saved "+filepath)
 	
 	def SLOT_actionSaveBook(self):
 		if self.book.archivepath==None: #if the book has never been saved
@@ -384,12 +389,14 @@ class WWMainWindow(QtGui.QMainWindow):
 			self.book.save_book()
 			self.actionSaveBook.setEnabled(False)
 			self.setWindowTitle ( unicode("WolfWriter : ")+ self.book.structure.project_name)
+			self.changeMessageStatusBar("Book : Has saved "+self.book.archivepath)
 	
 	def SLOT_actionSaveArchive(self):
 		# An archive is put in the zip file under the directory containg the date in the format
 		# YYYYMMDDHHMMSS. It allows the user to keep an old version of it's work.
 		self.sceneEdit.uploadScene()
 		self.book.save_archive()
+		self.changeMessageStatusBar("Book : Has made an archive")
 	
 		
 	def SLOT_actionExportBook(self):
@@ -399,7 +406,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		if filename:
 			self.sceneEdit.uploadScene()
 			self.book.save_txt(filename)
-				
+			self.changeMessageStatusBar("Book : Has exported at "+filename)
 		
 	def SLOT_objectActivated(self,object):
 		# this Slot is called when an object in the tree is activated :
@@ -497,7 +504,8 @@ class WWMainWindow(QtGui.QMainWindow):
 					self.sceneEdit.uploadScene()
 				finally:
 					fichier.close()
-		
+
+					
 	def SLOT_actionOpenConfig(self):
 		dialog= QtGui.QFileDialog(self)
 		
@@ -526,6 +534,11 @@ class WWMainWindow(QtGui.QMainWindow):
 			
 
 	#############################################
+	def changeMessageStatusBar(self,message=None):
+		if message==None: message=u""
+		self.statusBar().showMessage(message,CONSTANTS.TIME_STATUS_MESSAGE)
+		# self.statusBar().showMessage('AAA')
+		
 	
 	def closeEvent(self, event):
 		# cheak if we have changed something without saving

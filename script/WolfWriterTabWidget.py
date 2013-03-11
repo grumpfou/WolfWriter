@@ -243,6 +243,9 @@ class WWEncyPanel (QtGui.QWidget):
 		return self.displayPage(self.iterator+nb_times)
 	
 	def displayPage(self,iterator=-1):
+		if CONSTANTS.ENCY_TAB_APPLY and isinstance(self.list_pages[self.iterator],WWEncyPage):
+			self.list_pages[self.iterator].apply()
+			
 		iterator=iterator%len(self.list_pages)
 		
 		# We remove the previous widget
@@ -250,6 +253,7 @@ class WWEncyPanel (QtGui.QWidget):
 		wid_to_remove.close()
 		# We display the new page
 		self.mainLayout.addWidget(self.list_pages[iterator])
+		# self.list_pages[iterator].start
 		self.list_pages[iterator].show()
 		self.iterator=iterator
 		self.cheakButton()

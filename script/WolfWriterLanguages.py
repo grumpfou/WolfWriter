@@ -32,7 +32,7 @@ _ a __init__ method with :
 from PyQt4 import QtGui, QtCore
 from WolfWriterCommon import  CONSTANTS
 from WolfWriterWord import WWWordTools, WWWordDico
-	
+from WolfWriterLanguagesRules import *
 
 class WWLanguageAbstract:
 	name=u''
@@ -42,10 +42,18 @@ class WWLanguageAbstract:
 		### We are creating the autocorrection:
 		self.dicoWords=WWWordDico(data_list=CONSTANTS.AUTO_CORRECTION)
 		self.shortcuts_correction={	}
+		self.rules=[]
 		
 	
 	def correct_between_chars(self,cursor):
-		raise NotImplementedError
+		last_char=self.lastChar(cursor)
+		next_char=self.nextChar(cursor)
+		for rule in self.rules:
+			res=rule.correct(last_char,next_char,cursor)
+			if res :
+				return (rule,cursor.position())
+		
+		return False
 		
 	def lastChar(self,cursor,n=1):
 		if cursor.atBlockStart():
@@ -164,7 +172,21 @@ class WWLanguageFrench (WWLanguageAbstract):
 		WWLanguageAbstract.__init__(self)
 		self.shortcuts_correction_plugins={
 			(QtCore.Qt.CTRL+QtCore.Qt.Key_D,)	: self.dialog_correction}
-	
+		self.rules=[	WWRuleFrench0001(language=self),
+						WWRuleFrench0002(language=self),
+						WWRuleFrench0003(language=self),
+						WWRuleFrench0004(language=self),
+						WWRuleFrench0005(language=self),
+						WWRuleFrench0006(language=self),
+						WWRuleFrench0007(language=self),
+						WWRuleFrench0008(language=self),
+						WWRuleFrench0009(language=self),
+						WWRuleFrench0010(language=self),
+						WWRuleFrench0011(language=self),
+						WWRuleFrench0012(language=self),
+						WWRuleFrench0013(language=self)]
+
+	"""
 	def correct_between_chars(self,cursor):
 		last_char=self.lastChar(cursor)
 		next_char=self.nextChar(cursor)
@@ -251,7 +273,7 @@ class WWLanguageFrench (WWLanguageAbstract):
 				res=True
 		return res
 
-		
+		"""
 	def wordCorrection(self,word):
 		word=unicode(word)
 		id=WWWordTools.whatID(word)
