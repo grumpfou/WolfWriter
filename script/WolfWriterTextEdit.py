@@ -35,7 +35,8 @@ Contains a reimplementation of the QTextEdit that respect the typography of Lang
 class WWTextEdit(QtGui.QTextEdit):
 	def __init__(self, parent=None,book=None,main_window=None):
 		QtGui.QTextEdit.__init__(self,parent)
-		
+		self.font_size=CONSTANTS.TEXT_FONT_SIZE
+		self.indent=CONSTANTS.TEXT_INDENT
 		self.setTabChangesFocus (True)
 		
 		
@@ -70,7 +71,7 @@ class WWTextEdit(QtGui.QTextEdit):
 		self.actionLaunchCharWidgetTable=QtGui.QAction("&Special Characters",self)
 		
 		self.actionLaunchCharWidgetTable.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"character-set.png")))
-		self.connect(self.actionLaunchCharWidgetTable, QtCore.SIGNAL("triggered()"), self.launchCharWidgetTable)
+		self.connect(self.actionLaunchCharWidgetTable, QtCore.SIGNAL("triggered()"), self.SLOT_launchCharWidgetTable)
 		self.connect(mapper, QtCore.SIGNAL("mapped(int)"), self.SLOT_pluggins )
 		
 		
@@ -79,25 +80,25 @@ class WWTextEdit(QtGui.QTextEdit):
 		if book==None: book=self.book
 		if text==None: text=""
 
-		document=QtGui.QTextDocument(self)
-		if CONSTANTS.JUSTIFY:
-			document.setDefaultTextOption(QtGui.QTextOption(QtCore.Qt.AlignJustify))
-		cursor=QtGui.QTextCursor(document)
-		format_char=cursor.charFormat()
-		format_block=cursor.blockFormat()
-		format_char.setFont(QtGui.QFont(CONSTANTS.FONT,CONSTANTS.SIZE))
-		if CONSTANTS.INDENT!=0:
-			format_block.setTextIndent (CONSTANTS.INDENT)
-			format_block.setLineHeight (CONSTANTS.LINE_HEIGHT, QtGui.QTextBlockFormat.ProportionalHeight)
+		# if CONSTANTS.JUSTIFY:
+			# document.setDefaultTextOption(QtGui.QTextOption(QtCore.Qt.AlignJustify))
+		# format_char=cursor.charFormat()
+		# format_block=cursor.blockFormat()
+		# format_char.setFont(QtGui.QFont(CONSTANTS.FONT,self.font_size))
+		# if self.indent!=0:
+			# format_block.setTextIndent (self.indent)
+			# format_block.setLineHeight (CONSTANTS.LINE_HEIGHT, QtGui.QTextBlockFormat.ProportionalHeight)
 			
 		
-		cursor.setCharFormat(format_char)
-		cursor.setBlockFormat(format_block)
+		# cursor.setCharFormat(format_char)
+		# cursor.setBlockFormat(format_block)
 		
+		document=QtGui.QTextDocument(self)
+		cursor=QtGui.QTextCursor(document)
 		cursor.insertText(text)
 		cursor.setPosition(0)
 		
-		if CONSTANTS.RECHECK_SCENE_OPEN:
+		if CONSTANTS.RECHECK_TEXT_OPEN:
 			Language.cheak_after_paste(cursor)
 		
 		self.blockSignals (True)
@@ -217,6 +218,11 @@ class WWTextEdit(QtGui.QTextEdit):
 		
 		
 		
+	def SLOT_launchCharWidgetTable(self):
+			charWid=WWCharWidgetTable(linked_text_widget=self,parent=self,flags = QtCore.Qt.Tool)#, flag = QtCore.Qt.Dialog)
+			rect=self.cursorRect()
+			charWid.move(self.mapToGlobal (rect.bottomRight ()))
+			charWid.show()
 		
 	####################################################################
 	
@@ -238,11 +244,6 @@ class WWTextEdit(QtGui.QTextEdit):
 			self.highlighter.rehighlight()
 		self.blockSignals (False)
 		
-	def launchCharWidgetTable(self):
-			charWid=WWCharWidgetTable(linked_text_widget=self,parent=self,flags = QtCore.Qt.Tool)#, flag = QtCore.Qt.Dialog)
-			rect=self.cursorRect()
-			charWid.move(self.mapToGlobal (rect.bottomRight ()))
-			charWid.show()
 	
 	def afterCorrection(self,rule,pos):
 		pass
@@ -250,12 +251,50 @@ class WWTextEdit(QtGui.QTextEdit):
 class WWSceneEdit(WWTextEdit):
 	def __init__(self,parent,scene=None,book=None,main_window=None):
 		WWTextEdit.__init__(self,parent=parent,main_window=main_window,book=book)
+		# self.font_size=CONSTANTS.SCENE_FONT_SIZE
+		# self.indent=CONSTANTS.SCENE_INDENT
 		self.scene=None
 		self.book=None
 		self.setScene(scene,book)
 		
+		
+	def setText(self,text=None,book=None):
+		# Reimplementation of setText to put the format of the Scene edit
+		if book==None: book=self.book
+		if text==None: text=""
+
+		document=QtGui.QTextDocument(self)
+		if CONSTANTS.JUSTIFY:
+			document.setDefaultTextOption(QtGui.QTextOption(QtCore.Qt.AlignJustify))
+		cursor=QtGui.QTextCursor(document)
+		format_char=cursor.charFormat()
+		format_block=cursor.blockFormat()
+		format_char.setFont(QtGui.QFont(CONSTANTS.FONT,CONSTANTS.SCENE_FONT_SIZE))
+		if CONSTANTS.SCENE_INDENT!=0:
+			format_block.setTextIndent (CONSTANTS.SCENE_INDENT)
+			format_block.setLineHeight (CONSTANTS.LINE_HEIGHT, QtGui.QTextBlockFormat.ProportionalHeight)
+			
+		
+		cursor.setCharFormat(format_char)
+		cursor.setBlockFormat(format_block)
+		
+		cursor.insertText(text)
+		cursor.setPosition(0)
+		
+		if CONSTANTS.RECHECK_TEXT_OPEN:
+			Language.cheak_after_paste(cursor)
+		
+		self.blockSignals (True)
+		self.setDocument(document)
+		self.blockSignals (False)
+		if CONSTANTS.WITH_HIGHLIGHTER:
+			self.highlighter=WWHighlighter(self.document(),book=book)
+		self.setTextCursor(cursor)	
+
+		self.book=book	
 	
 	def uploadScene(self):
+		# Is called when it change the active scene, it uploads the WWScene class, making statistics etc.
 		if self.scene!=None:
 			newText=unicode(self.toPlainText())
 
@@ -267,6 +306,7 @@ class WWSceneEdit(WWTextEdit):
 			self.scene.parent.parent.doStats()
 	
 	def setScene(self,newscene,book=None):
+		#set a new scene in the widget
 		self.uploadScene()
 		# self.emit(QtCore.SIGNAL("correction1 (  )"))
 		# self.afterCorrection(0,0)

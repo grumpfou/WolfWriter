@@ -64,7 +64,10 @@ class WWCharWidgetTable(QtGui.QWidget):
 
 	def SLOT_itemActivated(self,item):
 		if self.linked_text_widget!=None:
-			self.linked_text_widget.insertPlainText(item.text())
+			if isinstance(self.linked_text_widget,QtGui.QTextEdit):
+				self.linked_text_widget.insertPlainText(item.text())
+			if isinstance(self.linked_text_widget,QtGui.QLineEdit):
+				self.linked_text_widget.insert(item.text())
 			
 		
 class WWCharTable (QtGui.QTableWidget):

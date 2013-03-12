@@ -486,14 +486,37 @@ class WWTreeModel (QtCore.QAbstractItemModel):
 	def nextIndex(self,index,with_children=True):
 		# This function get the next index that comes after the one in entry:
 		# If it has a child, it will gives the first child (excepect if with_children is false)
-		# Otherwise, it gives the next sibbling
+		# Otherwise, it gives the next sibling
 		# If there is no sibling, it gives the parents' next brother
-		# If the index is the last one, then it return an invalid index		
+		# If the index is the last one, then it return an invalid index
+		# Example :
+		#
+		#	S___1___11
+		#	 |   |__12
+		#	 |
+		#	 |__2___21
+		#	     |__22
+		#
+		#>>> WWTreeModel.nextIndex(index_of_21,with_children=True)
+		#    index_of_22 #the next sibling of 21 (because, 21 has no child)
+		#>>> WWTreeModel.nextIndex(index_of_21,with_children=False)
+		#    index_of_22 #the next sibling of 21
+		#>>> WWTreeModel.nextIndex(index_of_12,with_children=True)
+		#    index_of_1 #the parent of 12 (because, 12 has no child)
+		#>>> WWTreeModel.nextIndex(index_of_12,with_children=False)
+		#    index_of_1 #the parent of 12		
+		#>>> WWTreeModel.nextIndex(index_of_1,with_children=True)
+		#    index_of_11 #the first child of 1
+		#>>> WWTreeModel.nextIndex(index_of_1,with_children=False)
+		#    index_of_2 #the next sibling of 1
+		#>>> WWTreeModel.nextIndex(index_of_2,with_children=False)
+		#    index_of_S #the seed		
 		if with_children and self.rowCount(index)>0:   #if the node has children, we give the first child
 			return self.index(0,index.column(),index)
 		
 		parent_index=self.parent(index)
-		if not parent_index.isValid():
+		if parent_index.distanceToRoot()==0 and index.row()==self.rowCount(parent_index)-1:
+				#if we are at the last children of the seed, we return the seed
 			return parent_index
 			
 		if self.rowCount(self.parent(index))-index.row()>1:   #if the node has a next brother, we give the next brother
@@ -503,26 +526,47 @@ class WWTreeModel (QtCore.QAbstractItemModel):
 		return self.nextIndex(parent_index,with_children=False) # we search for the next index after the parent one
 		
 	def prevIndex(self,index,with_children=True):
-		# This function get the previous index that comes after the one in entry:
+		# This function get the previous index that comes before the one in entry:
 		# If it has a child, it will gives the last child (excepect if with_children is false)
-		# Otherwise, it gives the previous sibbling
+		# Otherwise, it gives the previous sibling
 		# If there is no sibling, it gives the parents' previous brother
 		# If the index is the first one, then it return an invalid index	
-		# if index.distanceToRoot()==0:
-			# return QtCore.QModelIndex()
+		# Example :
+		#
+		#	S___1___11
+		#	 |   |__12
+		#	 |
+		#	 |__2___21
+		#	     |__22
+		#
+		#>>> WWTreeModel.prevIndex(index_of_22,with_children=True)
+		#    index_of_21 #the previous sibling of 22 (because, 22 has no child)
+		#>>> WWTreeModel.prevIndex(index_of_22,with_children=False)
+		#    index_of_21 #the previous sibling of 22
+		#>>> WWTreeModel.prevIndex(index_of_21,with_children=True)
+		#    index_of_2 #the parent of 21 (because, 21 has no child)
+		#>>> WWTreeModel.prevIndex(index_of_21,with_children=False)
+		#    index_of_2 #the parent of 21
+		#>>> WWTreeModel.prevIndex(index_of_2,with_children=True)
+		#    index_of_22 #the last child of 2
+		#>>> WWTreeModel.prevIndex(index_of_2,with_children=False)
+		#    index_of_1 #the previous sibling of 2
+		#>>> WWTreeModel.prevIndex(index_of_1,with_children=False)
+		#    index_of_S #the seed		
 		
-		if with_children and self.rowCount(index)>0:   #if the node has children, we give the last child
+		if with_children and self.rowCount(index)>0:  #if the node has children, we give the last child
 			return self.index(self.rowCount(index)-1,index.column(),index)
 		
 		parent_index=self.parent(index)
-		if not parent_index.isValid():
-			return parent_index
+		if parent_index.distanceToRoot()==0 and index.row()==0:
+			# if we are a the first child of the seed, we return the seed
+			return parent_index #we return the seed of the tree
 			
 		if index.row()>0:   #if the node has a previous brother, we give the previous brother
 			index_tmp=self.index(index.row()-1,index.column(),parent_index)
 			return index_tmp
 		
-		return self.prevIndex(parent_index,with_children=False) # we search for the next index after the parent one
+		return self.prevIndex(parent_index,with_children=False) # we search for the next index before the parent one
 			
 	
 	

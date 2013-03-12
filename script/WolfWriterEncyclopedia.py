@@ -2,6 +2,7 @@ from PyQt4 import QtGui, QtCore
 from WolfWriterNodeXML import *
 from WolfWriterCommon import *
 from WolfWriterWord import *
+from WolfWriterLineEdit import *
 import re
 
 class WWEncyclopedia (WWNodeFirstAbstract):
@@ -185,13 +186,13 @@ class WWEntry (WWNodeAbstract):
 	
 	def attributeLayout_X(self,parent=None):
 		
-		name_choose = QtGui.QLineEdit ()
+		name_choose = WWLineEdit ()
 		name_choose.setText (self.name)
 		
-		type_choose	= QtGui.QLineEdit ()
+		type_choose	= WWLineEdit ()
 		type_choose.setText (self.type)
 		
-		other_names_choose	= QtGui.QLineEdit ()
+		other_names_choose	= WWLineEdit ()
 		other_names_str=""
 		for n in self.other_names:
 			other_names_str+=n+' '

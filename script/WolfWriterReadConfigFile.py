@@ -105,9 +105,11 @@ class WWReadConfigFile:
 		
 
 if __name__ == "__main__":
-	path = "C:\\Users\\Renaud\\Documents\\Python\\Writing_help\\WolfWriter\\Test\\config.txt"
+	from WolfWriterConstants import *
+	path = "C:\\Users\\Renaud\\Documents\\Programmation\\Python\\WolfWriter\\config\\config.txt"
+	CONSTANTS = WWConstants()
 	print CONSTANTS
-	WWReadConfigFile(path)
-	print CONSTANTS
+	WWReadConfigFile(path,CONSTANTS)
+	print CONSTANTS.__str__(True)
 				
 					

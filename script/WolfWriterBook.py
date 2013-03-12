@@ -6,6 +6,7 @@ from WolfWriterCommon import *
 from WolfWriterScene import *
 from WolfWriterNodeXML import *
 from WolfWriterEncyclopedia import *
+from WolfWriterLineEdit import *
 
 import zipfile
 import codecs
@@ -155,13 +156,13 @@ class WWBook:
 		pass
 	
 	def metadataLayout_X(self,parent=None):
-		author_choose = QtGui.QLineEdit ()
+		author_choose = WWLineEdit ()
 		author_choose.setText (self.structure.author)
 		
-		projectname_choose	= QtGui.QLineEdit ()
+		projectname_choose	= WWLineEdit ()
 		projectname_choose.setText (self.structure.project_name)
 		
-		storytitle_choose	= QtGui.QLineEdit ()
+		storytitle_choose	= WWLineEdit ()
 		storytitle_choose.setText (self.structure.story.title)
 		
 		layout_info=QtGui.QFormLayout()

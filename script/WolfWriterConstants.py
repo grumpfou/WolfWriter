@@ -18,18 +18,43 @@ For instance :
 """
 
 class WWConstants:
+	"""
+	JUSTIFY 				: if you want the text to be jsutify
+	SCENE_INDENT			: for the scene edit widget : to size of the indentation
+	TEXT_INDENT				: for the encyclopedia edit widget : to size of the indentation
+	SCENE_FONT_SIZE			: for the scene edit widget : to size of the font
+	TEXT_FONT_SIZE			: for the encyclopedia edit widget : to size of the font
+	FONT					: the name of the font in the edition widgets
+	LANGUAGE				: the language of the application (for now no effect)
+	DO_AUTO_CORRECTION		: if the software replace the word described in AUTO_CORRECTION
+	DO_TYPOGRAPHY			: if the software take care of the typography
+	AUTO_CORRECTION			: the list of the word and the word to replace
+	WITH_HIGHLIGHTER		: tels if the hilighter should be active
+	NAMEGEN_RANGE_LEN		: for the name generator : the range of the length
+	NAMEGEN_DFT_LEN			: for the name generator : the default length of the name to be created
+	NAMEGEN_RANGE_NUMBER	: for the name generator : the range of the number of names to be created
+	NAMEGEN_DFT_NUMBER		: for the name generator : the range of the number of names to be created
+	SEARCH_CONTXT_DIST		: for the search pannel : the size of the context in with is presented the result
+	MAX_ZFILL				: for the temporary file, the numbers of zeros into the files (limit the number of scenes)
+	EXTERNAL_SOFT_PATH		: the full path to an external software with which we edit the scene
+	LINE_HEIGHT				: the inter-line in the edit widgets
+	TIME_STATUS_MESSAGE		: the time it leaves a message into the status bar (put 0 if it is indefinitly)
+	RECHECK_TEXT_OPEN		: tels if we have to reacheck the typography of a text when reopening it
+	DELETE_TEMP_FILES		: tels if it deletes the temporary files, the ones that are created when dezipping the files
+	ENCY_TAB_APPLY			: tels if we apply the modifications made to a page of the encyclopedia when moving
+	DLT_OPEN_SAVE_SITE		: the path to the directory where we have to open the file ("~" if you want home)		
+	"""
 	def __init__(self,**kargs):
 		# The syntax is as follow
 		# value : [type,default_value]
 		self.all_constants= {
 			"JUSTIFY" 				: ( bool   		  , True  		),
-			"INDENT"				: ( int    		  , 50 			),
-			"SIZE"					: ( int    		  , 16 			),
+			"SCENE_INDENT"			: ( int    		  , 50 			),
+			"TEXT_INDENT"			: ( int    		  , 20 			),
+			"SCENE_FONT_SIZE"		: ( int    		  , 16 			),
+			"TEXT_FONT_SIZE"		: ( int    		  , 10 			),
 			"FONT"					: ( unicode 	  , "Times" 	),
-			"COLOR"					: ( unicode 	  , "red"		),
-			"BACKGROUND_COLOR"		: ( unicode 	  , "white"		),
 			"LANGUAGE"				: ( unicode 	  , "French"	),
-			"ZOOM"					: ( int			  , 0			),
 			"DO_AUTO_CORRECTION"	: ( bool	      , True		),
 			"DO_TYPOGRAPHY"			: ( bool	      , True		),
 			"AUTO_CORRECTION"		: ( [unicode]     , []			),
@@ -43,7 +68,7 @@ class WWConstants:
 			"EXTERNAL_SOFT_PATH"	: ( unicode		  ,	""			),
 			"LINE_HEIGHT"			: ( float		  , 100			),
 			"TIME_STATUS_MESSAGE"	: ( int			  , 3000		),
-			"RECHECK_SCENE_OPEN"	: ( bool		  , False		),
+			"RECHECK_TEXT_OPEN"		: ( bool		  , False		),
 			"DELETE_TEMP_FILES"		: ( bool		  , True		),
 			"ENCY_TAB_APPLY"		: ( bool		  , True		),
 			"DLT_OPEN_SAVE_SITE"	: ( unicode		  , "~"			)
@@ -72,8 +97,11 @@ class WWConstants:
 				except ValueError:
 					raise WWError("The arguments contained in "+str(kargs[key])+" should be convertible in "+str(self.all_constants[key][0]))				
 	
-	def __str__(self):
+	def __str__(self,only_different_from_default=False):
 		res=""
 		for key in self.all_constants.keys():
-			res+=key+" : "+str(self.__dict__[key])+"\n"
+			if only_different_from_default and self.__dict__[key]==self.all_constants[key][1]:
+				pass
+			else:
+				res+=key+" : "+str(self.__dict__[key])+"\n"
 		return res	

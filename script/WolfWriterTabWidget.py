@@ -2,6 +2,7 @@ from WolfWriterBook import *
 from WolfWriterEncyclopedia import *
 from WolfWriterCommon import *
 from WolfWriterEncyPage import *
+from WolfWriterLineEdit import *
 
 import sys
 import random
@@ -87,7 +88,7 @@ class WWSearchPanel( QtGui.QWidget):
 
 	
 		
-		self.search_line	= QtGui.QLineEdit ()
+		self.search_line	= WWLineEdit ()
 		
 		self.casse_checkbox = QtGui.QCheckBox()
 		self.regexp_checkbox = QtGui.QCheckBox()

@@ -1,6 +1,6 @@
 from PyQt4 import QtGui, QtCore
 from WolfWriterTextEdit import *
-# import WolfWriterTextEdit
+from WolfWriterLineEdit import *
 
 class WWEncyMainPage(QtGui.QWidget):
 	def __init__(self,encyclopedia,parent,parent_panel=None):
@@ -8,7 +8,7 @@ class WWEncyMainPage(QtGui.QWidget):
 		self.encyclopedia=encyclopedia
 		self.parent_panel=parent_panel
 
-		self.search_line = QtGui.QLineEdit ()
+		self.search_line = WWLineEdit ()
 		find_button = QtGui.QPushButton("&Find")
 		self.listWidget=QtGui.QListWidget()
 		
@@ -56,13 +56,13 @@ class WWEncyPage(QtGui.QWidget):
 		self.start()
 		
 	def start(self):
-		self.name_choose = QtGui.QLineEdit ()
+		self.name_choose = WWLineEdit()
 		self.name_choose.setText (self.entry.name)
 		
-		self.type_choose	= QtGui.QLineEdit ()
+		self.type_choose	= WWLineEdit ()
 		self.type_choose.setText (self.entry.type)
 		
-		self.other_names_choose	= QtGui.QLineEdit ()
+		self.other_names_choose	= WWLineEdit ()
 		other_names_str=""
 		for n in self.entry.other_names:
 			other_names_str+=n+' '

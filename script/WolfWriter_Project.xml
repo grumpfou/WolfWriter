@@ -12,6 +12,7 @@
             <File name="WolfWriterEncyPage.py" />
             <File name="WolfWriterLanguages.py" />
             <File name="WolfWriterCharTable.py" />
+            <File name="WolfWriterLineEdit.py" />
         </Folder>
         <Folder name="WWCore">
             <File name="WolfWriterBook.py" />
@@ -21,6 +22,7 @@
             <File name="WolfWriterNodeXML.py" />
             <File name="WolfWriterWord.py" />
             <File name="WolfWriterConstants.py" />
+            <File name="WolfWriterLanguagesRules.py" />
         </Folder>
     </Project>
 </NotepadPlus>

@@ -44,7 +44,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		
 		self.reload_pannels()
 		# self.statusBar().showMessage("Bonjour !!!")
-		self.changeMessageStatusBar() #to initiate the status bar
+		self.changeMessageStatusBar('Welcome in WolfWriter :-)') #to initiate the status bar
 		# self.sceneActive=None
 		
 	def setup_actions(self):
@@ -410,7 +410,6 @@ class WWMainWindow(QtGui.QMainWindow):
 		
 	def SLOT_objectActivated(self,object):
 		# this Slot is called when an object in the tree is activated :
-		# - if it is a chapter or the story, it allows to change the title
 		# - if it is the scene it is openning it in the WWSceneEdit
 		
 		if isinstance(object,WWScene):
