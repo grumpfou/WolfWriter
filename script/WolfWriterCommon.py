@@ -21,11 +21,11 @@ from WolfWriterReadConfigFile import *
 
 
 TMP_FILE_MARK='~'			# It is prefix of an temporary file
-MAIN_FILE_NAME='main.xml'   # The wich of the archive file that contains the 
+MAIN_FILE_NAME='main.xml'   # The wich of the zip file that contains the 
 							# main structure of the project
 DEPTH_SCENE=3               # The Depth of the Scene :
 							# for now DepthStory = 1, DepthChapter = 2, DepthChapter = 3 
-VERSIONXML_WW="0.9"         # The version of the archive files
+VERSIONXML_WW="0.9"         # The version of the zip files
 
 
 SPACE_SIMILAR=[u' ',u'\n',u'\u00A0'] # All the char that are similar to a space

@@ -28,22 +28,22 @@ class WWBook:
 			# self.structure=WWStructure(filepath=filepath,book=self,parent_file=None)
 		
 		
-	def __init__(self,archivepath=None):
+	def __init__(self,zippath=None):
 	
-		self.archivepath=archivepath
+		self.zippath=zippath
 		self.list_files=[]
 		self.list_archives=[]
-		
+		self.list_dirs=[]
 		self.dezip()
 		# self.list_files=os.listdir(dirname)
 		
 		assert TMP_FILE_MARK+"main.xml" in self.list_files
 		assert TMP_FILE_MARK+"encyclopedia.xml" in self.list_files
-		dirname,f=os.path.split(self.archivepath)
+		dirname,f=os.path.split(self.zippath)
 		filepath_structure=os.path.join(dirname,TMP_FILE_MARK+"main.xml")
 		filepath_encyclopedia=os.path.join(dirname,TMP_FILE_MARK+"encyclopedia.xml")
-
-		if archivepath!=None:
+		
+		if zippath!=None:
 			self.structure=WWStructure(filepath=filepath_structure,book=self,parent_file=None)
 			self.encyclopedia=WWEncyclopedia(filepath=filepath_encyclopedia,book=self,parent_file=None)
 		
@@ -64,35 +64,45 @@ class WWBook:
 		# # self.story=root.getFirstElementsByTagName('encyclopedia') ###TODO
 		
 	def dezip(self):
-		d,f=os.path.split(self.archivepath)
-		print "d  :  ",d
-		print "f  :  ",f
-		
-		zfile = zipfile.ZipFile(self.archivepath, 'r')
+		d,f=os.path.split(self.zippath)
+		zfile = zipfile.ZipFile(self.zippath, 'r')
 		try:
-			for i in zfile.namelist():  ## On parcourt l'ensemble des fichiers de l'archive
-				data = zfile.read(i)                   ## lecture du fichier compresse
-				try:
-					dir_arch,fil_arch=os.path.split(i)
-					print "i  :  ",i
-					print "dir_arch,fil_arch  :  ",dir_arch,fil_arch
-					if dir_arch=='':
-						j=TMP_FILE_MARK+fil_arch
-						self.list_files.append(j)
-						fp = open(os.path.join(d,j), "wb")  ## creation en local du nouveau fichier
-						fp.write(data)                         ## ajout des donnees du fichier compresse dans le fichier local
+			for i in zfile.namelist():  ## We look at all the files in the zip file
+				data = zfile.read(i)                   ## we read the compressed file
+					
+					
+					
+				dir_arch,fil_arch=os.path.split(i)
+				if dir_arch=='':
+					j=TMP_FILE_MARK+fil_arch
+					self.list_files.append(j)
+					fp = open(os.path.join(d,j), "wb")  ## we create a local new file
+					try:
+						fp.write(data)                      ## We add the data of the compressed file to the local file
+					except BaseException, e:
+						raise e
+					finally:
+						fp.close()
 						
-					else:
-						pass #for now we do not decompress the archives
-						# j=os.path.join(dir_arch,TMP_FILE_MARK+fil_arch)
+				else:
+					self.list_archives=list(set(self.list_archives).union(dir_arch))
+					self.list_dirs=list(set(self.list_dirs).union([TMP_FILE_MARK+dir_arch]))
+					dd=os.path.join(d,TMP_FILE_MARK+dir_arch)
+					if not os.path.exists(dd):
+						os.mkdir(dd)
+					j=TMP_FILE_MARK+fil_arch
+					self.list_files.append(os.path.join(TMP_FILE_MARK+dir_arch,j))
+					fp = open(os.path.join(dd,j), "wb")  ## we create a local new file
+					try:
+						fp.write(data)                      ## We add the data of the compressed file to the local file
+					except BaseException, e:
+						raise e
+					finally:
+						fp.close()
+					
 
-					print "j  :  ",j
-						
-
-				except BaseException, e:
-					raise e
-				finally:
-					fp.close()
+				
+				
 		finally:
 			zfile.close()
 	
@@ -100,7 +110,7 @@ class WWBook:
 		if filepath!=None:
 			dirname,filename=os.path.split(filepath)
 		else:
-			dirname,filename=os.path.split(self.archivepath)
+			dirname,filename=os.path.split(self.zippath)
 		zfile = zipfile.ZipFile(os.path.join(dirname,filename), 'w')
 		
 		
@@ -109,10 +119,12 @@ class WWBook:
 		try:
 			for f in new_list_names:
 				dir_arch,fil_arch=os.path.split(f)
+				# print "dir_arch,fil_arch  :  ",dir_arch,fil_arch
+				# We get rid of the TMP_FILE_MARK
 				if dir_arch=='':
 					ff=fil_arch[len(TMP_FILE_MARK):]
 				else:
-					ff=os.path.join(dir_arch,fil_arch[len(TMP_FILE_MARK):])			
+					ff=os.path.join(dir_arch[len(TMP_FILE_MARK):],fil_arch[len(TMP_FILE_MARK):])			
 				
 				pathway=os.path.join(dirname,f)
 				zfile.write(pathway,arcname=ff)
@@ -122,20 +134,26 @@ class WWBook:
 	
 	def del_files(self,dirname=None):
 		if dirname==None:
-			dirname,f=os.path.split(self.archivepath)
+			dirname,f=os.path.split(self.zippath)
 		for i in self.list_files:
 			try:
 				os.remove(os.path.join(dirname,i))
 			except:
-				# print "struggle to supress ",i
+				print "struggle to supress ",i
 				pass
+		for i in self.list_dirs:
+			try:
+				os.rmdir(os.path.join(dirname,i))
+			except:
+				print "struggle to supress ",i
+				pass			
 
 			
 	def save_book(self,filepath=None):
 		if filepath!=None:
 			dirname=None
 		else:
-			dirname,f=os.path.split(self.archivepath)
+			dirname,f=os.path.split(self.zippath)
 			
 		self.structure.save_xml(dirname=dirname)
 		self.structure.save_associate_files(dirname=dirname)
@@ -202,21 +220,26 @@ class WWBook:
 		return dialog
 		
 	def save_archive(self,name=None):
+		# this function is used to create a local archive :
+		# An archive is a complete copy of the book at a presise moment. In further version of WolfWriter it will allow to make some statistics,
+		# to compare with anteriors version of the software etc.
+		# Be carefull
 		if name == None:
 			name=str(WWDate())
 		
-		dirpath,f=os.path.split(self.archivepath)
+		dirpath,f=os.path.split(self.zippath)
 			
-		dir_archive_path=os.path.join(dirpath,name)
+		dir_archive_path=os.path.join(dirpath,TMP_FILE_MARK+name)
 		os.mkdir(dir_archive_path)
 		self.structure.save_xml(dirname=dir_archive_path)
 		self.structure.save_associate_files(dirname=dir_archive_path)
 		self.encyclopedia.save_xml(dirname=dir_archive_path)
 		
-		new_list_names=[os.path.join(name,TMP_FILE_MARK+fname) for fname in self.structure.list_associate_files]+\
-							[os.path.join(name,TMP_FILE_MARK+'encyclopedia.xml'),os.path.join(name,TMP_FILE_MARK+'main.xml')]
+		new_list_names=[os.path.join(TMP_FILE_MARK+name,TMP_FILE_MARK+fname) for fname in self.structure.list_associate_files]+\
+							[os.path.join(TMP_FILE_MARK+name,TMP_FILE_MARK+'encyclopedia.xml'),os.path.join(TMP_FILE_MARK+name,TMP_FILE_MARK+'main.xml')]
 		self.list_files=list(set(self.list_files+new_list_names))
 		self.list_archives.append(name)
+		self.list_dirs.append(TMP_FILE_MARK+name)
 		
 	# def xml_output(self,doc,parentNode):
 		

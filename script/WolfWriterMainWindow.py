@@ -332,10 +332,10 @@ class WWMainWindow(QtGui.QMainWindow):
 			if (res != QtGui.QMessageBox.Yes) and (res != QtGui.QMessageBox.No):
 				return False
 		
-		if CONSTANTS.DELETE_TEMP_FILES and self.book.archivepath!=None: #if we have to delete the temporary files and if the book is not a new one
+		if CONSTANTS.DELETE_TEMP_FILES and self.book.zippath!=None: #if we have to delete the temporary files and if the book is not a new one
 				self.book.del_files()
-		self.book=WWBook(archivepath=abs_path_new_book) # we load the empty book file
-		self.book.archivepath=None					# we put it's archivepath to None (allow the software to ask 
+		self.book=WWBook(zippath=abs_path_new_book) # we load the empty book file
+		self.book.zippath=None					# we put it's zippath to None (allow the software to ask 
 													# 							where to save at the first saving)
 		self.setWindowTitle ( unicode("WolfWriter : ")+ self.book.structure.project_name)
 
@@ -351,12 +351,12 @@ class WWMainWindow(QtGui.QMainWindow):
 		
 		dialog= QtGui.QFileDialog(self)
 		
-		filename = dialog.	getOpenFileName(self,"Select a archive",self.get_default_opening_saving_site())
+		filename = dialog.	getOpenFileName(self,"Select a ww file",self.get_default_opening_saving_site())
 		if filename:
-			if CONSTANTS.DELETE_TEMP_FILES and self.book.archivepath!=None: #if we have to delete the temporary files and if the book is not a new one
+			if CONSTANTS.DELETE_TEMP_FILES and self.book.zippath!=None: #if we have to delete the temporary files and if the book is not a new one
 				self.book.del_files()
 			filename=unicode(filename)
-			self.book=WWBook(archivepath=filename)
+			self.book=WWBook(zippath=filename)
 			# self.treeView.setStory(self.book.structure.story)
 			self.reload_pannels()
 			self.changeMessageStatusBar("Book : Has openned "+filename)
@@ -366,22 +366,22 @@ class WWMainWindow(QtGui.QMainWindow):
 	
 	def SLOT_actionSaveAsBook(self):
 		dialog= QtGui.QFileDialog(self)
-		filepath = dialog.getSaveFileName(self,"Select a archive where to save",self.get_default_opening_saving_site())
+		filepath = dialog.getSaveFileName(self,"Select a ww file where to save",self.get_default_opening_saving_site())
 		if filepath:
 			self.sceneEdit.uploadScene()
 			filepath=unicode(filepath)
-			old_archivepath=self.book.archivepath
+			old_zipvepath=self.book.zippath
 			self.book.save_book(filepath=filepath)
-			self.book.archivepath=filepath
+			self.book.zippath=filepath
 			
-			dirname,f=os.path.split(old_archivepath)
+			dirname,f=os.path.split(old_zipvepath)
 			
-			if CONSTANTS.DELETE_TEMP_FILES and self.book.archivepath!=None: #if we have to delete the temporary files and if the book is not a new one
+			if CONSTANTS.DELETE_TEMP_FILES and self.book.zippath!=None: #if we have to delete the temporary files and if the book is not a new one
 				self.book.del_files(dirname)
 			self.changeMessageStatusBar("Book : Has saved "+filepath)
 	
 	def SLOT_actionSaveBook(self):
-		if self.book.archivepath==None: #if the book has never been saved
+		if self.book.zippath==None: #if the book has never been saved
 			self.SLOT_actionSaveAsBook()
 			
 		else:
@@ -389,7 +389,7 @@ class WWMainWindow(QtGui.QMainWindow):
 			self.book.save_book()
 			self.actionSaveBook.setEnabled(False)
 			self.setWindowTitle ( unicode("WolfWriter : ")+ self.book.structure.project_name)
-			self.changeMessageStatusBar("Book : Has saved "+self.book.archivepath)
+			self.changeMessageStatusBar("Book : Has saved "+self.book.zippath)
 	
 	def SLOT_actionSaveArchive(self):
 		# An archive is put in the zip file under the directory containg the date in the format
@@ -397,7 +397,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		self.sceneEdit.uploadScene()
 		self.book.save_archive()
 		self.changeMessageStatusBar("Book : Has made an archive")
-	
+		self.actionSaveBook.setEnabled (True)	
 		
 	def SLOT_actionExportBook(self):
 		# Slot that export the book under another format (for now only txt)
@@ -548,7 +548,7 @@ class WWMainWindow(QtGui.QMainWindow):
 			else:
 				event.ignore()
 		else:
-			if CONSTANTS.DELETE_TEMP_FILES and self.book.archivepath!=None: #if we have to delete the temporary files and if the book is not a new one
+			if CONSTANTS.DELETE_TEMP_FILES and self.book.zippath!=None: #if we have to delete the temporary files and if the book is not a new one
 				self.book.del_files()
 			event.accept()
 
@@ -581,18 +581,18 @@ class WWMainWindow(QtGui.QMainWindow):
 		
 	def get_default_opening_saving_site(self):
 		# When open a file dialog, in which directory the dialog window should begin :
-		if self.book.archivepath== None:
+		if self.book.zippath== None:
 			return os.path.expanduser(CONSTANTS.DLT_OPEN_SAVE_SITE)
 		else :
-			res,tmp=os.path.split(self.book.archivepath)
+			res,tmp=os.path.split(self.book.zippath)
 			return res
 if __name__ == '__main__':
 	app = QtGui.QApplication(sys.argv)
 	if len(sys.argv)>1:
-		bk=WWBook(archivepath=sys.argv[1])
+		bk=WWBook(zippath=sys.argv[1])
 	else:
-		bk=WWBook(archivepath=abs_path_new_book)
-		bk.archivepath=None
+		bk=WWBook(zippath=abs_path_new_book)
+		bk.zippath=None
 		
 		
 	

@@ -403,7 +403,7 @@ if __name__ == '__main__':
 	pp="C:\\Users\\Renaud\\Documents\\Programmation\\Python\\WolfWriter_Test\\TestPerso\\testa.zip"
 	
 	
-	bk=WWBook(archivepath=pp)
+	bk=WWBook(zippath=pp)
 	
 	app = QtGui.QApplication(sys.argv)
 	
