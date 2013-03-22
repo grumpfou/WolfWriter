@@ -7,6 +7,7 @@ from WolfWriterScene import *
 from WolfWriterNodeXML import *
 from WolfWriterEncyclopedia import *
 from WolfWriterLineEdit import *
+from WolfWriterError import WWEvalError
 
 import zipfile
 import codecs
@@ -163,7 +164,8 @@ class WWBook:
 		
 		
 	def save_txt(self,filename):
-		res=self.structure.txt_output()
+		raise NotImplementedError('deserted')
+		res=self.structure.output()
 		fichier = codecs.open(filename, encoding='utf-8', mode='w')
 		try :
 			fichier.write(res)
@@ -282,12 +284,34 @@ class WWStructure (WWNodeFirstAbstract):
 		self.story.xml_output(doc,node)
 		parentNode.appendChild(node)	
 
-	def txt_output(self):
-		res=u""
-		res+=self.story.title
-		res+=u"Author : "+self.author+u"\n\n"
-		res+=self.story.txt_output()
-		return res
+	def output(self,structure_withTitle=True,structure_titleSyntax="self.story.title+'\n\n'",structure_withAuthor=True,structure_authorSyntax="'Author : '+self.author\n\n",\
+					structure_beforeSyntax=None,structure_afterSyntax=None,**kargs):
+		to_add=u""
+		if structure_beforeSyntax!=None:
+			try :
+				to_add+=eval(structure_beforeSyntax)
+			except SyntaxError:
+				raise WWEvalError(structure_beforeSyntax)
+		
+		if structure_withTitle :
+			try :
+				to_add+=eval(structure_titleSyntax)
+			except SyntaxError:
+				raise WWEvalError(structure_titleSyntax)
+		if structure_withAuthor:
+			try :
+				to_add+=eval(structure_authorSyntax)
+			except SyntaxError:
+				raise WWEvalError(structure_authorSyntax)
+		to_add+=self.story.output(**kargs)
+		
+		if structure_afterSyntax!=None:
+			try :
+				to_add+=eval(structure_afterSyntax)
+			except SyntaxError:
+				raise WWEvalError(structure_afterSyntax)
+		
+		return to_add
 		
 	def save_associate_files(self,dirname=None):
 		if dirname==None:
@@ -380,16 +404,14 @@ class WWStory (WWNodeAbstract):
 		for i in self.list_atributes: node.setAttribute(i,unicode(self.__dict__[i]))
 		parentNode.appendChild(node)
 		
-	def txt_output(self,chapter_number='romain',scene_sep=u'***'):
-		res=u''
-		for i,ch in enumerate(self.list_chapters):
-			res+=u"Chapitre "+WWRomanNumber(i+1)+u"\n\n"
-			number_scenes=len(ch.children)
-			for j,sc in enumerate(ch.children):
-				res+=sc.txt_output()
-				if j<number_scenes-1:
-					res+=u"\n\n"+scene_sep+u"\n\n"
-		return res
+	# def output(self,chapter_number='romain',**kargs,scene_sep=u'***'):
+	# def output(self,structure_withTitle=True,structure_titleSyntax="self.title\n\n",structure_withAuthor=True,structure_authorSyntax="'Author : '+self.author\n\n",**kargs
+	def output(self,**kargs):
+	
+		to_add=u''
+		for child in self.children:
+			to_add+=child.output(**kargs)
+		return to_add
 			
 	def doStats(self):
 		numberChars=0
@@ -541,6 +563,28 @@ class WWChapter (WWNodeAbstract):
 		else:
 			return WWNodeAbstract.getInfo(self,info)
 			
+	def output(self,chapter_isSeparator=False,chapter_separator='***\n',chapter_titleSyntax="'Chapter : '+WWRomanNumber(self.number_in_brotherhood())+'\n\n'",**kargs):
+		to_add=u""
+		if chapter_isSeparator:
+			if chapter_separator==None:
+				chapter_separator="\n"
+			if self.number_in_brotherhood()>0:
+				to_add+=chapter_separator
+				# to_add+=chapter_separator+'\n' # Attention : \\n is not allways the symbol of newline
+				
+		else:
+			try :
+				to_add += eval(chapter_titleSyntax)
+			except SyntaxError:
+				raise WWEvalError(chapter_titleSyntax)
+				
+		for child in self.children:
+			to_add+=child.output(**kargs)
+	
+		return to_add
+		
+			
+
 	def find(self,patern,**kargs):
 		for sc in self.children:
 			for word in sc.find(patern,**kargs):
@@ -553,7 +597,7 @@ if __name__ == '__main__':
 	doc = XML.Document()
 	bk.structure.xml_output(doc,doc)
 	print doc.toprettyxml()	
-	print (bk.structure.txt_output()).encode('ascii','replace')
+	print (bk.structure.output()).encode('ascii','replace')
 	
 	# pp="C:\Users\Renaud\Documents\Python\Writing_help\WolfWriter\Test\masterpiece.xml"
 	# xml_file=XML.parse(pp)

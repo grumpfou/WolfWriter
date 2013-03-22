@@ -10,6 +10,8 @@ from WolfWriterTextEdit import *
 from WolfWriterBook import *
 from WolfWriterTabWidget import *
 from WolfWriterCommon import *
+from WolfWriterExport import *
+from WolfWriterError import *
 
 
 """
@@ -400,13 +402,20 @@ class WWMainWindow(QtGui.QMainWindow):
 		self.actionSaveBook.setEnabled (True)	
 		
 	def SLOT_actionExportBook(self):
-		# Slot that export the book under another format (for now only txt)
+		# Slot that export the book under another format (for now only txt and html)
 		dialog= QtGui.QFileDialog(self)
-		filename = dialog.getSaveFileName(self,"Select a directory where to save",self.get_default_opening_saving_site()) #only txt for now
+		filename = dialog.getSaveFileName(self,"Select a directory where to save",self.get_default_opening_saving_site(),\
+			"Text file (*.txt);;Html file (*.html)") #only txt and html for now
 		if filename:
-			self.sceneEdit.uploadScene()
-			self.book.save_txt(filename)
-			self.changeMessageStatusBar("Book : Has exported at "+filename)
+			path,ext=os.path.splitext(unicode(filename))
+			dico={export.extension : export for export in WWExportList}
+			if ext[1:] in dico.keys():  #Cheaking if the extension is in the WWExport possibles
+				self.sceneEdit.uploadScene()
+				export=dico[ext[1:]](self.book) #we create the corresponding WWExports
+				export.save(unicode(filename))
+				self.changeMessageStatusBar("Book : Has exported at "+unicode(filename))
+			else:
+				QtGui.QMessageBox.critical(self, "Exportation impossible", 'Can not convert to the format : '+ext)
 		
 	def SLOT_objectActivated(self,object):
 		# this Slot is called when an object in the tree is activated :
@@ -481,7 +490,7 @@ class WWMainWindow(QtGui.QMainWindow):
 			return False
 		if self.sceneEdit.scene!=None:
 			self.sceneEdit.uploadScene()
-			text=self.sceneEdit.scene.txt_output()
+			text=self.sceneEdit.scene.output()
 			i=0
 			while TMP_FILE_MARK+"tmp"+str(i).zfill(CONSTANTS.MAX_ZFILL)+'.txt' in os.listdir('.'):
 				i+=1

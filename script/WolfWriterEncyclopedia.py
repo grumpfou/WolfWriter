@@ -148,11 +148,11 @@ class WWEncyclopedia (WWNodeFirstAbstract):
 			entry.xml_output(doc,node)
 		parentNode.appendChild(node)	
 
-	def txt_output(self):
+	def output(self):
 		res=u""
 		res+=u"Encyclopedia \n\n"
 		for entry in self.list_entry:
-			res+=entry.txt_output()+u"\n\n"
+			res+=entry.output()+u"\n\n"
 		return res
 
 
@@ -275,7 +275,7 @@ class WWEntry (WWNodeAbstract):
 		parentNode.appendChild(node)
 
 
-	def txt_output(self):
+	def output(self):
 		res=self.get_name_with_other_names()
 		if self.desc!=u"":
 			res+=u': \n'+self.desc
@@ -331,7 +331,7 @@ if __name__ == '__main__':
 	print "##############################################"
 	print (doc.toPrettyWithText()).encode('ascii','replace')		
 	
-	# print (en.txt_output()).encode('ascii','replace')			
+	# print (en.output()).encode('ascii','replace')			
 	# print unicode(en.word_set.dico).encode('ascii','replace')			
 			
 

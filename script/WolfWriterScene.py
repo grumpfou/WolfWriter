@@ -7,6 +7,7 @@ import re
 from WolfWriterError import *
 from WolfWriterCommon import *	
 from WolfWriterNodeXML import *
+from WolfWriterError import WWEvalError
 		
 class WWScene (WWNodeFirstAbstract):
 	xml_name="scene"
@@ -53,8 +54,29 @@ class WWScene (WWNodeFirstAbstract):
 		node.appendChild(text_container)
 		parentNode.appendChild(node)
 		
-	def txt_output(self):
-		return self.text
+	def output(self,scene_isSeparator=True,scene_separator='***\n',scene_titleSyntax="'Scene : '+self.number_in_brotherhood()+'\\n\\n'",\
+					block_begin=None,block_end='\n',**kargs):
+		to_add=u""
+		if block_begin==None: block_begin=u""
+		if scene_isSeparator:
+			if scene_separator==None:
+				scene_separator="\n"
+			if self.number_in_brotherhood()>0:
+				to_add+=scene_separator
+				# to_add+=chapter_separator+'\n' # Attention : \\n is not allways the symbol of newline
+				
+		else:
+			try :
+				to_add = eval(scene_titleSyntax)
+			except SyntaxError:
+				raise WWEvalError(scene_titleSyntax)
+				
+		
+		to_add+=block_begin+self.text.replace('\n',block_end+block_begin)+block_end #Todo
+	
+		return to_add		
+				
+		
 		
 	def getInfo(self,info):
 		if info=='title':

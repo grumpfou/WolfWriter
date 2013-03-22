@@ -43,7 +43,7 @@ class WWNodeAbstract:
 
 	def xml_output(self):
 		raise NotImplementedError
-	def txt_output(self):
+	def output(self):
 		raise NotImplementedError
 	
 	def find(self,patern,**kargs):
