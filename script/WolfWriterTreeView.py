@@ -40,8 +40,9 @@ I plan to merge this class with the WWStory, WWChapters and WWScene in a further
 
 
 class WWTreeView(QtGui.QTreeView):
-	def __init__(self,story,parent=None):
+	def __init__(self,story,parent=None,main_window=None):
 		QtGui.QTreeView.__init__(self,parent)			
+		self.main_window=main_window
 		model=WWTreeModel(story,parent=self)
 		self.setModel(model)
 		self.setup_actions()
@@ -127,7 +128,7 @@ class WWTreeView(QtGui.QTreeView):
 		# self.model().insertRows(index.row(),1,index.parent())
 	def SLOT_test(self):
 		print 'test'		
-	def SLOT_addChapter(self,place=0):
+	def SLOT_addChapter(self,place=0,with_activation=True):
 		index=self.selectionModel().currentIndex()
 		dist=index.distanceToRoot()
 		
@@ -144,12 +145,16 @@ class WWTreeView(QtGui.QTreeView):
 			
 			
 		chap_title = QtGui.QInputDialog.getText(self, "Nouveau Chapitre", "Quel est le titre du nouveau chapitre ?")
+		if not chap_title[1]:
+			return False
 		scne_title = QtGui.QInputDialog.getText(self, "Premiere Scene", "Quel est le titre de la premiere scene ?")
+		if not scne_title[1]:
+			return False
 		
-		if scne_title[1]: new_scene=self.model().story.parent.create_new_scene(title=scne_title[0])
+		if unicode(scne_title[0])!=u'': new_scene=self.model().story.parent.create_new_scene(title=scne_title[0])
 		else : new_scene=self.model().story.parent.create_new_scene()
 			
-		if chap_title[1]:
+		if unicode(chap_title[1])!=u'':
 			new_chapter=WWChapter(xml_node=None,
 					parent=self.model().story,
 					title= chap_title[0] 
@@ -164,12 +169,17 @@ class WWTreeView(QtGui.QTreeView):
 		index=self.model().index(row,0,index)
 		self.model().insertRows(0,1,index,list_objects=[new_scene])
 		self.SLOT_emitChanged()
+		if with_activation:
+			index=self.model().index(0,0,index)
+			self.setCurrentIndex(index)
+			self.SLOT_activated(index)
+		return True
 
 	def SLOT_addChapterBefore(self):
 		self.SLOT_addChapter(place=-1)
 		
 		
-	def SLOT_addScene(self,place=0):
+	def SLOT_addScene(self,place=0,with_activation=True):
 	
 		index=self.selectionModel().currentIndex()
 		dist=index.distanceToRoot()
@@ -184,16 +194,16 @@ class WWTreeView(QtGui.QTreeView):
 		
 		
 		scne_title = QtGui.QInputDialog.getText(self, "Nouvelle Secne", "Quel est le titre de la premiere scene ?")
-		if scne_title[1]: new_scene=self.model().story.parent.create_new_scene(title=scne_title[0])
-		else : new_scene=self.model().story.parent.create_new_scene()
-		
-		self.model().insertRows(row,1,index.parent(),list_objects=[new_scene])
-		# itemScene=itemScenes[0]		
-		
-		# columnDataScene=[new_scene.getInfo(i) for i in self.model().headers]
-		self.SLOT_emitChanged()
-		# for i,column in enumerate(columnDataScene):
-			# itemScene.setData(i, column)
+		if scne_title[1]:
+			if unicode(scne_title[0])!=u'': new_scene=self.model().story.parent.create_new_scene(title=scne_title[0])
+			else : new_scene=self.model().story.parent.create_new_scene()
+			
+			self.model().insertRows(row,1,index.parent(),list_objects=[new_scene])
+			self.SLOT_emitChanged()
+			if with_activation:
+				index=self.model().index(row,0,index.parent())
+				self.setCurrentIndex(index)
+				self.SLOT_activated(index)
 
 	def SLOT_addSceneBefore(self):
 		self.SLOT_addScene(place=-1)
@@ -248,7 +258,7 @@ class WWTreeView(QtGui.QTreeView):
 			
 	
 		
-	def SLOT_removeObject(self):
+	def SLOT_removeObject(self,with_activation=True):
 		index=self.selectionModel().currentIndex()
 		row=index.row()
 		dist=index.distanceToRoot()
@@ -263,11 +273,27 @@ class WWTreeView(QtGui.QTreeView):
 			
 			return self.SLOT_removeObject()	
 
-		ans = QtGui.QMessageBox.question(self, "Delete Message", "Do you really want to delete the "+object.xml_name, QtGui.QMessageBox.Yes | QtGui.QMessageBox.No);
+		ans = QtGui.QMessageBox.question(self, "Delete Message", "Do you really want to delete the "+object.xml_name+' '+object.title,\
+					QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
 		
 		if ans==QtGui.QMessageBox.Yes:
+			index_parent=index.parent()
 			self.model().removeRows(index.row(),1,index.parent())
 			self.SLOT_emitChanged()
+			
+			if with_activation:
+				if self.main_window.sceneEdit.scene==object or self.main_window.sceneEdit.scene in object.children:
+					#if the active scene has been deleted
+					object_parent=self.model().getItem(index.parent())
+					number_children=len(object_parent.children)
+					index=self.model().index(min(row,number_children-1),0,index_parent) #we take the more close index to the delted object
+					dist=index.distanceToRoot()
+					while dist<DEPTH_SCENE-1: #if it is not a scene, we o thurther in the tree
+						index=self.model().index(0,0,index)
+						dist=index.distanceToRoot()
+						
+					self.setCurrentIndex(index)
+					self.SLOT_activated(index)			
 			return True
 		else : 
 			return False

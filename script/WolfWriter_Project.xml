@@ -23,6 +23,7 @@
             <File name="WolfWriterWord.py" />
             <File name="WolfWriterConstants.py" />
             <File name="WolfWriterLanguagesRules.py" />
+            <File name="WolfWriterExport.py" />
         </Folder>
     </Project>
 </NotepadPlus>

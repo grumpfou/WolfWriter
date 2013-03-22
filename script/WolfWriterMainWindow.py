@@ -99,7 +99,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		self.actionOpenConfig		= QtGui.QAction("&Open Config File",self)
 		
 		# Action of opening the scene with another software (mine is called antidote)
-		self.actionSendToAntidote	= QtGui.QAction("&Send the Scene to antidote",self)
+		self.actionSendToExternalSoftware	= QtGui.QAction("&Send the Scene to the external software",self)
 		
 		
 	def setup_connections(self):
@@ -117,7 +117,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		self.connect(self.actionDeleteChapter	, QtCore.SIGNAL('triggered()'), self.SLOT_actionDeleteChapter)
 		self.connect(self.actionAddScene		, QtCore.SIGNAL('triggered()'), self.SLOT_actionAddScene)
 		self.connect(self.actionDeleteScene		, QtCore.SIGNAL('triggered()'), self.SLOT_actionDeleteScene)
-		self.connect(self.actionSendToAntidote	, QtCore.SIGNAL('triggered()'), self.SLOT_actionSendToAntidote)
+		self.connect(self.actionSendToExternalSoftware	, QtCore.SIGNAL('triggered()'), self.SLOT_actionSendToExternalSoftware)
 		# self.connect(self.treeView				, QtCore.SIGNAL('correction (PyQt_PyObject,int)'), self.SLOT_messageStatusBar)
 		# self.connect(self.sceneEdit				, QtCore.SIGNAL("correction1 (  )"), self.SLOT_messageStatusBar)
 		
@@ -134,7 +134,7 @@ class WWMainWindow(QtGui.QMainWindow):
 	def setup_mainLayout(self):
 		def setup_leftLayout(widget):
 			self.leftLayout=QtGui.QVBoxLayout(widget)
-			self.treeView=WWTreeView(story=self.book.structure.story,parent=self)
+			self.treeView=WWTreeView(story=self.book.structure.story,parent=self,main_window=self)
 			toolBar=self.treeView.getToolBar(self)
 			self.leftLayout.addWidget( toolBar )
 			self.leftLayout.addWidget( self.treeView )
@@ -273,7 +273,7 @@ class WWMainWindow(QtGui.QMainWindow):
 			for action in self.sceneEdit.getEditActions():
 				menuEditScene.addAction(action)
 			menuEditScene.addAction(self.sceneEdit.actionLaunchCharWidgetTable)
-			menuEditScene.addAction(self.actionSendToAntidote) #TODO : transfert to Scene and change name
+			menuEditScene.addAction(self.actionSendToExternalSoftware) #TODO : transfert to Scene and change name
 			# menuEditScene.addAction(self.sceneEdit.actionRecheackTypography)	#TODO
 			
 		def setupOptions	():	
@@ -310,7 +310,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		def setup_scene():
 			menuScene.addAction(self.actionAddScene)
 			menuScene.addAction(self.actionDeleteScene)
-			menuScene.addAction(self.actionSendToAntidote)
+			menuScene.addAction(self.actionSendToExternalSoftware)
 		def setup_options():
 			menuOptions.addAction(self.actionOpenConfig)
 		def setup_about():	
@@ -482,11 +482,11 @@ class WWMainWindow(QtGui.QMainWindow):
 			index=self.treeView.getIndex(self.sceneEdit.scene)
 			self.treeView.setCurrentIndex(index)
 			
-	def SLOT_actionSendToAntidote (self):
+	def SLOT_actionSendToExternalSoftware (self):
 		# Send the scene to another software (mine is called Antidote and accept only a certain type of encoding).
 		path=CONSTANTS.EXTERNAL_SOFT_PATH
 		if path=="":
-			QtGui.QMessageBox.information(self, "Antidote Sender", "Sorry, there is no path to the Antidote software in the configuration file.")
+			QtGui.QMessageBox.information(self, "External Software Sender", "Sorry, there is no path to the external software in the configuration file.")
 			return False
 		if self.sceneEdit.scene!=None:
 			self.sceneEdit.uploadScene()
@@ -502,7 +502,7 @@ class WWMainWindow(QtGui.QMainWindow):
 				fichier.close()
 			s=subprocess.call(path+' '+os.path.abspath(name))
 			
-			res = QtGui.QMessageBox.question(self, "Antidote Sender", "Have you finished to correct the file", QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
+			res = QtGui.QMessageBox.question(self, "External Software Sender", "Have you finished to correct the file?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
  
 			if (res == QtGui.QMessageBox.Yes) :
 				fichier = codecs.open(name, encoding='utf-8-sig', mode='rb')

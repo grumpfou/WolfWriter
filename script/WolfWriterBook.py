@@ -7,6 +7,7 @@ from WolfWriterScene import *
 from WolfWriterNodeXML import *
 from WolfWriterEncyclopedia import *
 from WolfWriterLineEdit import *
+from WolfWriterWord import *
 from WolfWriterError import WWEvalError
 
 import zipfile
@@ -424,10 +425,11 @@ class WWStory (WWNodeAbstract):
 		self.stats={"numberChars":numberChars,"numberWords":numberWords}			
 			
 	def getInfo(self,info):
-		if info=='numberWords':
-			return self.stats["numberWords"]
-		else:
-			return WWNodeAbstract.getInfo(self,info)
+		return WWWordTools.toID(info,WWWordTools.IND_FIRST_CAP)
+		# if info=='numberWords':
+			# return self.stats["numberWords"]
+		# else:
+			# return WWNodeAbstract.getInfo(self,info)
 	
 	def find(self,patern,**kargs):
 		for ch in self.list_chapters:
