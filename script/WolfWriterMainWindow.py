@@ -100,6 +100,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		
 		# Action of opening the scene with another software (mine is called antidote)
 		self.actionSendToExternalSoftware	= QtGui.QAction("&Send the Scene to the external software",self)
+		self.actionCheckSceneTypography	= QtGui.QAction("&Re-check the typography of the whole scene",self)
 		
 		
 	def setup_connections(self):
@@ -118,6 +119,7 @@ class WWMainWindow(QtGui.QMainWindow):
 		self.connect(self.actionAddScene		, QtCore.SIGNAL('triggered()'), self.SLOT_actionAddScene)
 		self.connect(self.actionDeleteScene		, QtCore.SIGNAL('triggered()'), self.SLOT_actionDeleteScene)
 		self.connect(self.actionSendToExternalSoftware	, QtCore.SIGNAL('triggered()'), self.SLOT_actionSendToExternalSoftware)
+		self.connect(self.actionCheckSceneTypography	, QtCore.SIGNAL('triggered()'), self.sceneEdit.SLOT_recheckTypography)
 		# self.connect(self.treeView				, QtCore.SIGNAL('correction (PyQt_PyObject,int)'), self.SLOT_messageStatusBar)
 		# self.connect(self.sceneEdit				, QtCore.SIGNAL("correction1 (  )"), self.SLOT_messageStatusBar)
 		
@@ -274,6 +276,7 @@ class WWMainWindow(QtGui.QMainWindow):
 				menuEditScene.addAction(action)
 			menuEditScene.addAction(self.sceneEdit.actionLaunchCharWidgetTable)
 			menuEditScene.addAction(self.actionSendToExternalSoftware) #TODO : transfert to Scene and change name
+			menuEditScene.addAction(self.actionCheckSceneTypography) #TODO : transfert to Scene and change name
 			# menuEditScene.addAction(self.sceneEdit.actionRecheackTypography)	#TODO
 			
 		def setupOptions	():	

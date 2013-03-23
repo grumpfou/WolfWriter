@@ -51,6 +51,7 @@ class WWLanguageAbstract:
 		for rule in self.rules:
 			res=rule.correct(last_char,next_char,cursor)
 			if res :
+				print "res  :  ",res
 				return (rule,cursor.position())
 		
 		return False
@@ -158,9 +159,39 @@ class WWLanguageAbstract:
 	
 
 	
+class WWLanguageEnglish (WWLanguageAbstract):
+	encoding='utf-8'
+	name=u'English'
+	shortcuts_insert={}
+	
+	
+	def __init__(self):
+		WWLanguageAbstract.__init__(self)
+		self.shortcuts_correction_plugins={}
+		self.rules=[	\
+						WWRuleEnglish0001(language=self),
+						WWRuleEnglish0002(language=self),
+						WWRuleEnglish0003(language=self),
+						WWRuleEnglish0004(language=self),
+						WWRuleEnglish0005(language=self),
+						WWRuleEnglish0006(language=self),
+						WWRuleEnglish0007(language=self),
+						WWRuleEnglish0008(language=self),
+						WWRuleEnglish0009(language=self),
+						WWRuleEnglish0010(language=self),
+						WWRuleEnglish0011(language=self)]
+						# ]
+						
+	
+	def wordCorrection(self,word):
+		return False
+
+
+			
+	
 class WWLanguageFrench (WWLanguageAbstract):
 	encoding='utf-8'
-	name=u'Fran\u00E7ais'
+	name=u'French'
 	shortcuts_insert={
 			(QtCore.Qt.CTRL+QtCore.Qt.Key_7		,QtCore.Qt.SHIFT+QtCore.Qt.Key_A)	:u"\u00C0",
 			(QtCore.Qt.CTRL+QtCore.Qt.Key_Comma	,QtCore.Qt.SHIFT+QtCore.Qt.Key_C)	:u"\u00C7",
@@ -299,6 +330,6 @@ class WWLanguageFrench (WWLanguageAbstract):
 			self.correct_between_chars(cur_tmp)
 			
 	
-			
+WWLanguageDico={"French":WWLanguageFrench,"English":WWLanguageEnglish}			
 	
-Language=WWLanguageFrench()
+# Language=WWLanguageEnglish()

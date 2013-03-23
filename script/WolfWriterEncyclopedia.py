@@ -185,14 +185,16 @@ class WWEntry (WWNodeAbstract):
 		
 	
 	def attributeLayout_X(self,parent=None):
-		
-		name_choose = WWLineEdit ()
+		language_name=CONSTANTS.DFT_WRITING_LANGUAGE
+		if self.parent.book!=None:
+			language_name=self.parent.book.structure.language
+		name_choose = WWLineEdit (language_name=language_name)
 		name_choose.setText (self.name)
 		
-		type_choose	= WWLineEdit ()
+		type_choose	= WWLineEdit (language_name=language_name)
 		type_choose.setText (self.type)
 		
-		other_names_choose	= WWLineEdit ()
+		other_names_choose	= WWLineEdit (language_name=language_name)
 		other_names_str=""
 		for n in self.other_names:
 			other_names_str+=n+' '

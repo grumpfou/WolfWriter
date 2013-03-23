@@ -88,7 +88,7 @@ class WWSearchPanel( QtGui.QWidget):
 
 	
 		
-		self.search_line	= WWLineEdit ()
+		self.search_line	= WWLineEdit (language_name=self.book.structure.language)
 		
 		self.casse_checkbox = QtGui.QCheckBox()
 		self.regexp_checkbox = QtGui.QCheckBox()

@@ -26,6 +26,7 @@ class WWConstants:
 	TEXT_FONT_SIZE			: for the encyclopedia edit widget : to size of the font
 	FONT					: the name of the font in the edition widgets
 	LANGUAGE				: the language of the application (for now no effect)
+	DFT_WRITING_LANGUAGE	: by default when creating a new book, what language should we choose
 	DO_AUTO_CORRECTION		: if the software replace the word described in AUTO_CORRECTION
 	DO_TYPOGRAPHY			: if the software take care of the typography
 	AUTO_CORRECTION			: the list of the word and the word to replace
@@ -55,6 +56,7 @@ class WWConstants:
 			"TEXT_FONT_SIZE"		: ( int    		  , 10 			),
 			"FONT"					: ( unicode 	  , "Times" 	),
 			"LANGUAGE"				: ( unicode 	  , "French"	),
+			"DFT_WRITING_LANGUAGE"	: ( unicode 	  , "English"	),
 			"DO_AUTO_CORRECTION"	: ( bool	      , True		),
 			"DO_TYPOGRAPHY"			: ( bool	      , True		),
 			"AUTO_CORRECTION"		: ( [unicode]     , []			),

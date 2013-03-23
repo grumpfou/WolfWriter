@@ -10,13 +10,22 @@ from WolfWriterLanguages import *
 from WolfWriterCharTable import *
 
 class WWLineEdit(QtGui.QLineEdit):
-	def __init__(self,*args,**kargs):
+	def __init__(self,language_name=None,*args,**kargs):
 		QtGui.QLineEdit.__init__(self,*args,**kargs)
 		self.actionLaunchCharWidgetTable=QtGui.QAction("&Special Characters",self)		
 		self.actionLaunchCharWidgetTable.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"character-set.png")))
 		self.connect(self.actionLaunchCharWidgetTable, QtCore.SIGNAL("triggered()"), self.SLOT_launchCharWidgetTable)
 		
-		dico=Language.shortcuts_insert
+		
+		if language_name==None:
+			self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
+		else :
+			if not WWLanguageDico.has_key(language_name):
+				self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
+				raise WWError("Do not have the typography for the language "+language_name)
+			else:
+				self.language=WWLanguageDico[language_name]()
+		dico=self.language.shortcuts_insert
 		mapper = QtCore.QSignalMapper(self)
 		for k in dico.keys():
 			short=QtGui.QShortcut(QtGui.QKeySequence(*k),self)

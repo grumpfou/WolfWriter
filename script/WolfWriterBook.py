@@ -8,7 +8,8 @@ from WolfWriterNodeXML import *
 from WolfWriterEncyclopedia import *
 from WolfWriterLineEdit import *
 from WolfWriterWord import *
-from WolfWriterError import WWEvalError
+from WolfWriterLanguages import *
+from WolfWriterError import *
 
 import zipfile
 import codecs
@@ -177,24 +178,34 @@ class WWBook:
 		pass
 	
 	def metadataLayout_X(self,parent=None):
-		author_choose = WWLineEdit ()
+		author_choose = WWLineEdit (language_name=self.structure.language)
 		author_choose.setText (self.structure.author)
 		
-		projectname_choose	= WWLineEdit ()
+		projectname_choose	= WWLineEdit (language_name=self.structure.language)
 		projectname_choose.setText (self.structure.project_name)
 		
-		storytitle_choose	= WWLineEdit ()
+		storytitle_choose	= WWLineEdit (language_name=self.structure.language)
 		storytitle_choose.setText (self.structure.story.title)
 		
+		writinglanguage_choose	= QtGui.QComboBox ()
+		writinglanguage_choose.addItems(WWLanguageDico.keys())
+		indice=writinglanguage_choose.findText (self.structure.language)
+		if indice==-1:
+			 WWError("Do not have the typography for the language "+self.structure.language)
+		else:
+			writinglanguage_choose.setCurrentIndex (
+					writinglanguage_choose.findText (self.structure.language))
+			
 		layout_info=QtGui.QFormLayout()
 		layout_info.addRow("&Author : ",author_choose)
 		layout_info.addRow("&ProjectName : ",projectname_choose)
 		layout_info.addRow("&StoryTitle : ",storytitle_choose)
+		layout_info.addRow("&Language : ",writinglanguage_choose)
 		
-		return (layout_info, author_choose,projectname_choose,storytitle_choose)	
+		return (layout_info, author_choose,projectname_choose,storytitle_choose,writinglanguage_choose)	
 	
 	def metadataDialog_X(self,parent=None):
-		layout_info, author_choose,projectname_choose,storytitle_choose=self.metadataLayout_X()
+		layout_info, author_choose,projectname_choose,storytitle_choose,writinglanguage_choose=self.metadataLayout_X()
 		layout_button=QtGui.QHBoxLayout ()
 		generer = QtGui.QPushButton("&Generate")
 		quitter = QtGui.QPushButton("&Quit")
@@ -214,6 +225,9 @@ class WWBook:
 			self.structure.author=unicode(author_choose.text())
 			self.structure.project_name=unicode(projectname_choose.text())
 			self.structure.story.title=unicode(storytitle_choose.text())
+			if self.structure.language!=unicode(writinglanguage_choose.currentText ()):
+				self.structure.language=unicode(writinglanguage_choose.currentText ())
+				QtGui.QMessageBox.warning(parent, "Language change","You should save and re-open the book to apply changes")
 			dialog.accept()
 			
 		
@@ -254,7 +268,7 @@ class WWBook:
 		
 class WWStructure (WWNodeFirstAbstract):
 	xml_name="structure"
-	dico_attributes={"project_name":unicode,"author":unicode,"creation_date":int,"versionXML_WW":unicode} 
+	dico_attributes={"project_name":unicode,"author":unicode,"creation_date":int,"versionXML_WW":unicode,"language":unicode} 
 	
 	def __init__(self,filepath,book=None,parent_file=None,**kargs_if_creation):
 		if book==None:
@@ -264,6 +278,10 @@ class WWStructure (WWNodeFirstAbstract):
 		else:
 			WWNodeFirstAbstract.__init__(self,filepath,new=False,parent_file=parent_file,**kargs_if_creation)	
 			self.book=book
+		
+		if not self.__dict__.has_key("language"): #If "language" was not precise in the xml file
+			self.language=CONSTANTS.DFT_WRITING_LANGUAGE #We supposed it is the default one
+			self.list_atributes.append("language")
 			
 		# TODO
 		# self.encyclopedia_node=root.getFirstElementsByTagName(WWEncyclopedia.xml_name)

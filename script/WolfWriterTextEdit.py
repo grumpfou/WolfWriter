@@ -8,6 +8,7 @@ from WolfWriterLanguages import *
 from WolfWriterReadConfigFile import *
 from WolfWriterHighlighter import *
 from WolfWriterCharTable import *
+from WolfWriterError import *
 # from WolfWriterEncyPage import *
 
 """
@@ -43,11 +44,19 @@ class WWTextEdit(QtGui.QTextEdit):
 		QtCore.QObject.connect(self,QtCore.SIGNAL("cursorPositionChanged()"),self.SLOT_cursorPositionChanged)
 		self.old_cursor_position=self.textCursor().position()
 		self.book=book
+		if self.book==None:
+			self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
+		else :
+			if not WWLanguageDico.has_key(self.book.structure.language):
+				self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
+				raise WWError("Do not have the typography for the language "+self.book.structure.language)
+			else:
+				self.language=WWLanguageDico[self.book.structure.language]()
 		self.main_window=main_window
 		if CONSTANTS.WITH_HIGHLIGHTER:
 			self.highlighter=WWHighlighter(self.document(),book=book)
 		
-		dico=Language.shortcuts_insert
+		dico=self.language.shortcuts_insert
 		mapper = QtCore.QSignalMapper(self)
 		for k in dico.keys():
 			short=QtGui.QShortcut(QtGui.QKeySequence(*k),self)
@@ -56,7 +65,7 @@ class WWTextEdit(QtGui.QTextEdit):
 			mapper.setMapping(short, dico[k])
 		self.connect(mapper, QtCore.SIGNAL("mapped(const QString &)"), self.insertPlainText )
 		
-		dico=Language.shortcuts_correction_plugins
+		dico=self.language.shortcuts_correction_plugins
 		self.dico_pluggins={}
 		mapper = QtCore.QSignalMapper(self)
 		for i,k in enumerate(dico.keys()):
@@ -79,9 +88,15 @@ class WWTextEdit(QtGui.QTextEdit):
 	def setText(self,text=None,book=None):
 		if book==None: book=self.book
 		if text==None: text=""
-
+		if self.book!=None:
+			if self.language.name!=self.book.structure.language:
+				if not WWLanguageDico.has_key(self.book.structure.language):
+					self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
+					raise WWError("Do not have the typography for the language "+self.book.structure.language)
+				else:
+					self.language=WWLanguageDico[self.book.structure.language]()
 		# if CONSTANTS.JUSTIFY:
-			# document.setDefaultTextOption(QtGui.QTextOption(QtCore.Qt.AlignJustify))
+		# document.setDefaultTextOption(QtGui.QTextOption(QtCore.Qt.AlignJustify))
 		# format_char=cursor.charFormat()
 		# format_block=cursor.blockFormat()
 		# format_char.setFont(QtGui.QFont(CONSTANTS.FONT,self.font_size))
@@ -99,7 +114,7 @@ class WWTextEdit(QtGui.QTextEdit):
 		cursor.setPosition(0)
 		
 		if CONSTANTS.RECHECK_TEXT_OPEN:
-			Language.cheak_after_paste(cursor)
+			self.language.cheak_after_paste(cursor)
 		
 		self.blockSignals (True)
 		self.setDocument(document)
@@ -124,15 +139,15 @@ class WWTextEdit(QtGui.QTextEdit):
 			cursor=QtGui.QTextCursor(self.document())
 			cursor.clearSelection()
 			cursor.setPosition(self.old_cursor_position)
-			res=Language.correct_between_chars(cursor)
+			res=self.language.correct_between_chars(cursor)
 			if res and self.main_window!=None:
 				self.main_window.changeMessageStatusBar("Correction : "+res[0].title)
 			
 		if CONSTANTS.AUTO_CORRECTION:
 			cursor=self.textCursor()
-			last_char=Language.lastChar(cursor)
+			last_char=self.language.lastChar(cursor)
 			if last_char in [u' ',u'\u00A0',u'\n',u';',u':',u'!',u'?',u',',u'.',u"'",u'-']:
-				Language.afterWordWritten(cursor)
+				self.language.afterWordWritten(cursor)
 		
 		self.blockSignals (False)
 		self.old_cursor_position=self.textCursor().position()
@@ -148,7 +163,7 @@ class WWTextEdit(QtGui.QTextEdit):
 		cursor = QtGui.QTextCursor(self.document())
 		cursor = self.cursorForPosition(event.pos())
 		self.setTextCursor(cursor)
-		word,cur_tmp=Language.getWordUnderCursor(cursor,char_expection=[u'-'])
+		word,cur_tmp=self.language.getWordUnderCursor(cursor,char_expection=[u'-'])
 		# cursor.select(QtGui.QTextCursor.WordUnderCursor)
 		# word=cursor.selectedText ()
 		def addWord():
@@ -188,7 +203,7 @@ class WWTextEdit(QtGui.QTextEdit):
 			cursor = QtGui.QTextCursor(self.document())
 			cursor = self.cursorForPosition(event.pos())
 			self.setTextCursor(cursor)
-			word,cur_tmp=Language.getWordUnderCursor(cursor,char_expection=[u'-'])
+			word,cur_tmp=self.language.getWordUnderCursor(cursor,char_expection=[u'-'])
 			if self.book.encyclopedia.word_set.isIn (word):
 				print 'isin'
 				
@@ -224,6 +239,10 @@ class WWTextEdit(QtGui.QTextEdit):
 			charWid.move(self.mapToGlobal (rect.bottomRight ()))
 			charWid.show()
 		
+	def SLOT_recheckTypography(self):
+		cursor=self.textCursor()
+		cursor.setPosition(0)
+		self.language.cheak_after_paste(cursor)
 	####################################################################
 	
 
@@ -234,7 +253,7 @@ class WWTextEdit(QtGui.QTextEdit):
 		cursor_pos=cursor.position()
 		cursor.insertText(text)
 		cursor.setPosition(cursor_pos)
-		Language.cheak_after_paste(cursor,text.size()) 
+		self.language.cheak_after_paste(cursor,text.size()) 
 		self.blockSignals (False)
 	
 	def  	resizeEvent (self,event):
@@ -262,7 +281,15 @@ class WWSceneEdit(WWTextEdit):
 		# Reimplementation of setText to put the format of the Scene edit
 		if book==None: book=self.book
 		if text==None: text=""
-
+		if self.book!=None:
+			if self.language.name!=self.book.structure.language:
+				if not WWLanguageDico.has_key(self.book.structure.language):
+					self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
+					raise WWError("Do not have the typography for the language "+self.book.structure.language)
+				else:
+					self.language=WWLanguageDico[self.book.structure.language]()
+		
+		
 		document=QtGui.QTextDocument(self)
 		if CONSTANTS.JUSTIFY:
 			document.setDefaultTextOption(QtGui.QTextOption(QtCore.Qt.AlignJustify))
@@ -282,7 +309,7 @@ class WWSceneEdit(WWTextEdit):
 		cursor.setPosition(0)
 		
 		if CONSTANTS.RECHECK_TEXT_OPEN:
-			Language.cheak_after_paste(cursor)
+			self.language.cheak_after_paste(cursor)
 		
 		self.blockSignals (True)
 		self.setDocument(document)
