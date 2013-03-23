@@ -67,7 +67,6 @@ class WWNodeAbstract:
 		return 0
 		
 	def insertChildren(self,position, list_objects):
-		print "list_objects  :  ",list_objects
 		assert 0<=position<=len(self.children)
 		pos=position
 		for obj in list_objects:

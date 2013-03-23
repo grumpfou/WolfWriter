@@ -211,34 +211,40 @@ class WWTreeView(QtGui.QTreeView):
 		index=self.selectionModel().currentIndex()
 		row=index.row()
 		dist=index.distanceToRoot()
-		
+		siblingsCount=len(self.model().getItem(index.parent()).children)
 		
 		object=(self.model().getItem(index))
 		new_index=False
 		if 0<dist<DEPTH_SCENE and row>0: #We move a chapter or a scene
 			self.model().moveRows(pos_init=row,pos_end=row-1, rows=1,parent_init=index.parent(),parent_end=None)
-			self.SLOT_emitChanged()
 		elif dist==DEPTH_SCENE-1 and row==0: #We move a scene in the upper chapter
-			##### TO CORRECT ###########
-			# parent=self.model().getItem(index).parent()
-			# print "parent.childCount() AVANT :  ",parent.childCount()
-			# parent_place=parent.number_in_brotherhood()
-			# if parent_place>0:
-				# assert object.xml_name=="scene"
-				# index_parent_end=index.parent().sibling(parent_place-1,0)
-				# parent_end=self.model().getItem(index_parent_end)
-				# object_parent_end=parent_end.object
+			index_end=self.selectionModel().currentIndex()
+			index_end=self.model().prevIndex(index_end)
+			while index_end.isValid() and index_end.distanceToRoot()!=DEPTH_SCENE-1:
+				if index_end.distanceToRoot()==0:
+					return False #We are at the end of the tree
+				index_end=self.model().prevIndex(index_end)
+			if not index_end.isValid():
+				return False	#We are at the end of the tree	
+			if siblingsCount==1:  #If it was the last scene in the chapter		
+				#we ask if we have to delete the chapter
+				ans = QtGui.QMessageBox.question(self, "Delete Message", \
+					"You will delete the chapter "+object.parent.title,QtGui.QMessageBox.Yes \
+					| QtGui.QMessageBox.No)
+				if not ans==QtGui.QMessageBox.Yes:
+					return False
+				to_delete_index=index.parent()
 				
-				# newPlace=parent_end.childCount()
+			pos_end=self.model().getItem(index_end).number_in_brotherhood()+1 #the place where we should place the scene
+			self.model().moveRows(pos_init=row,pos_end=pos_end, rows=1,\
+				parent_init=index.parent(),parent_end=index_end.parent())
+			if siblingsCount==1:
+				#we delete the empty chapter
+				self.SLOT_removeObject(index=to_delete_index,with_activation=False,with_confirm_msg=False)
 				
-				
-				# self.model().moveRows(pos_init=row,pos_end=newPlace, rows=1,parent_init=index.parent(),parent_end=index_parent_end)
-				# object.parent.moveScene(initPlace=row, newPlace=newPlace,otherChapter=parent_end.object)	
-				# new_index=self.model().index(parent_end.childCount()-1,index.column(),parent=index_parent_end)
-				
-			# print "parent.childCount() APRES :  ",parent.childCount()
-			##### TO CORRECT ###########
-			pass
+		self.SLOT_emitChanged()
+		return True
+	
 			
 	def SLOT_actionMoveObjectDown(self):
 		index=self.selectionModel().currentIndex()
@@ -248,18 +254,43 @@ class WWTreeView(QtGui.QTreeView):
 		siblingsCount=len(self.model().getItem(index.parent()).children)
 		
 		object=(self.model().getItem(index))
-		new_index=False
+
 		if 0<=dist<DEPTH_SCENE and row<siblingsCount-1: #We move a chapter or a scene
 			self.model().moveRows(pos_init=row,pos_end=row+1, rows=1,parent_init=index.parent(),parent_end=None)
-			self.SLOT_emitChanged()
 		elif dist==DEPTH_SCENE-1 and row==siblingsCount-1: #We move a scene in the downer chapter
-			pass
+			index_end=self.selectionModel().currentIndex()
+			index_end=self.model().nextIndex(index_end)
+			while index_end.isValid() and index_end.distanceToRoot()!=DEPTH_SCENE-1:
+				if index_end.distanceToRoot()==0:
+					return False #We are at the end of the tree
+				index_end=self.model().nextIndex(index_end)
+			if not index_end.isValid():
+				return False		
+			if siblingsCount==1:#If it was the last scene in the chapter		
+				#we ask if we have to delete the chapter				
+				ans = QtGui.QMessageBox.question(self, "Delete Message", \
+					"You will delete the chapter "+object.parent.title,QtGui.QMessageBox.Yes \
+					| QtGui.QMessageBox.No)
+				if not ans==QtGui.QMessageBox.Yes:
+					return False
+				to_delete_index=index.parent()
 				
+			self.model().moveRows(pos_init=row,pos_end=0, rows=1,\
+				parent_init=index.parent(),parent_end=index_end.parent())
+			if siblingsCount==1:
+				#we delete the empty chapter
+				self.SLOT_removeObject(index=to_delete_index,with_activation=False,with_confirm_msg=False)
+		
+		self.SLOT_emitChanged()
+		return True
 			
 	
 		
-	def SLOT_removeObject(self,with_activation=True):
-		index=self.selectionModel().currentIndex()
+	def SLOT_removeObject(self,index=None,with_activation=True,with_confirm_msg=True):
+		#index : the index of the object to remove
+		#with_activation : change the active scene in self.main_window if we delete it
+		#with_confirm_msg : ask for a confirmation before making deletion
+		if index==None :index=self.selectionModel().currentIndex()
 		row=index.row()
 		dist=index.distanceToRoot()
 		
@@ -273,27 +304,29 @@ class WWTreeView(QtGui.QTreeView):
 			
 			return self.SLOT_removeObject()	
 
-		ans = QtGui.QMessageBox.question(self, "Delete Message", "Do you really want to delete the "+object.xml_name+' '+object.title,\
-					QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-		
-		if ans==QtGui.QMessageBox.Yes:
-			index_parent=index.parent()
-			self.model().removeRows(index.row(),1,index.parent())
-			self.SLOT_emitChanged()
+		if with_confirm_msg:
+			ans = QtGui.QMessageBox.question(self, "Delete Message", "Do you really want to delete the "+object.xml_name+' '+object.title,\
+						QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
 			
-			if with_activation:
-				if self.main_window.sceneEdit.scene==object or self.main_window.sceneEdit.scene in object.children:
-					#if the active scene has been deleted
-					object_parent=self.model().getItem(index.parent())
-					number_children=len(object_parent.children)
-					index=self.model().index(min(row,number_children-1),0,index_parent) #we take the more close index to the delted object
-					dist=index.distanceToRoot()
-					while dist<DEPTH_SCENE-1: #if it is not a scene, we o thurther in the tree
-						index=self.model().index(0,0,index)
-						dist=index.distanceToRoot()
-						
-					self.setCurrentIndex(index)
-					self.SLOT_activated(index)			
+			if not ans==QtGui.QMessageBox.Yes:
+				return False
+		index_parent=index.parent()
+		self.model().removeRows(index.row(),1,index.parent())
+		self.SLOT_emitChanged()
+		
+		if with_activation and \
+				(self.main_window.sceneEdit.scene==object or self.main_window.sceneEdit.scene in object.children):
+			#if the active scene has been deleted
+			object_parent=self.model().getItem(index.parent())
+			number_children=len(object_parent.children)
+			index=self.model().index(min(row,number_children-1),0,index_parent) #we take the more close index to the delted object
+			dist=index.distanceToRoot()
+			while dist<DEPTH_SCENE-1: #if it is not a scene, we o thurther in the tree
+				index=self.model().index(0,0,index)
+				dist=index.distanceToRoot()
+				
+			self.setCurrentIndex(index)
+			self.SLOT_activated(index)			
 			return True
 		else : 
 			return False
