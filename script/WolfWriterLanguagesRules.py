@@ -1,4 +1,20 @@
-
+"""
+Part of the WolfWriter project. Written by Renaud Dessalles.
+Contains a re-implementation of the WWRuleAbstract. Each of these class codes for a 
+typography rule in a given language. They are used in the WWLanguge classses in order to make
+corections.
+Every rule should reimplement the following attributes.
+- title : the title will be display in the status bar of the main Windows, it should be a line
+	long description of the rule.
+- decription : it is a more complete descritpion of the rule stating precicesly what the rule 
+	is doing, with exemples
+- correct : this method will make the correction. It has in entry the left and right character,
+	and check if they are correct. It corrects the possible errors. It should return True if
+	there has been an correction of False otherwise.
+	
+Note: it is possible in the "correct" reimplementation to have access to more distant 
+	charaters via self.language.lastChar and self.language.nextChar.
+"""
 
 
 class WWRuleAbstract:
@@ -14,9 +30,6 @@ class WWRuleAbstract:
 	
 	def correct(self,last_char,next_char,cursor):
 		raise NotImplementedError
-	
-
-
 		return False
 
 
@@ -154,7 +167,6 @@ class WWRuleEnglish0008 (WWRuleAbstract):
 		
 class WWRuleEnglish0009 (WWRuleAbstract):
 	title="A space or a newline after '.' or ',' except if it is a figure or a closing guillemet (CG)."
-	# title="AAAAAAAAAAAAAAAAAAA"
 	description=	\
 		"Check if there is a newline or a space after '.' or ',' and if it is not the case, it inserts one (replacing the unbreakable space is necessary. This rule does not apply if the next character is a figure.\n\
 		example :	'I agree.And you' -> 'I agree. And you'\n\

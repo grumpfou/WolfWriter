@@ -1,4 +1,7 @@
-
+"""
+Part of the WolfWriter project. Written by Renaud Dessalles
+Contains the basic Error used in the WOlfWriter project.
+"""
 class WWError (Exception):
     def __init__(self,raison):
         self.raison = raison

@@ -1,9 +1,9 @@
-import string
 """
 Part of the WolfWriter project. Written by Renaud Dessalles
 Contains classes relative to Words, the reason I need theses classes is that I needed to
 deal with the capital letters.
 """
+import string
 
 # This static class allows to detect the format of a word and to change it:
 class WWWordTools:
@@ -114,6 +114,9 @@ class WWWordSet:
 	
 	
 class WWWordDico:
+	# A dictionary of the words that is case sensitive. the self.dico is a dictionary
+	# that has in key the word in whatever case. The attribute will be a tuple 
+	# containing the corresponding word and it's ID (specified in WWWordTools).
 	def __init__(self,data_list=None):
 		self.dico={}
 		if data_list!=None:
@@ -140,6 +143,9 @@ class WWWordDico:
 		else: return False
 	
 	def input_from_CONSTANTS(self,data_list):
+		# data_list is the list of entries containdes in CONSTANTS.AUTO_CORRECTION.
+		# It is under the form of ["key value"]. This function is splitting on the 
+		# space and adding the entry in the dictionary.
 		for data in data_list:
 			# print "data : ",data.encode('ascii','replace')
 			data_tmp=data.strip()
@@ -150,6 +156,7 @@ class WWWordDico:
 				self.addWord(k,v)
 	
 	def output_for_CONSTANTS(self):
+		# return a data_list in the form of ["key1 value1","key2 value2",...]
 		data_list=[]
 		for k in self.dico.keys():
 			data_list.append(k+' '+self.dico[k])

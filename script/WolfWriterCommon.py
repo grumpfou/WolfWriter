@@ -1,17 +1,17 @@
-import xml.dom.minidom as XML
-import xml.parsers.expat as XML_Error
-import datetime
-import os
-import sys
-# import string
-import re
-from PyQt4 import QtCore,QtGui
-
 """
 Part of the WolfWriter project. Written by Renaud Dessalles
 This file contain some simple function that might be use in all the source files.
 It is a Melding pot of all kind of functions and constants
 """
+import xml.dom.minidom as XML
+import xml.parsers.expat as XML_Error
+import datetime
+import os
+import sys
+import re
+# import string
+
+from PyQt4 import QtCore,QtGui
 
 # Here we create the CONTANTS instance.
 from WolfWriterConstants import *
@@ -41,9 +41,10 @@ abs_path_constants_file	= os.path.join(abs_path_WWMainWindow,rel_path_constants_
 abs_path_new_book		= os.path.join(abs_path_WWMainWindow,rel_path_new_book		)
 abs_path_icon			= os.path.join(abs_path_WWMainWindow,rel_path_icon			)
 
-WWReadConfigFile(os.path.join(sys.argv[0],abs_path_constants_file),CONSTANTS) # overload the CONTANTS attribute by the 
+try:
+	WWReadConfigFile(os.path.join(sys.argv[0],abs_path_constants_file),CONSTANTS) # overload the CONTANTS attribute by the 
 												# config_file's information.
-
+except:pass
 
 
 
@@ -168,181 +169,6 @@ def distanceToRoot_WW(self):
 QtCore.QModelIndex.distanceToRoot=distanceToRoot_WW
 
 
-# class WWRevision:
-	# ###TODO Faire la meme methode que pour node abstract
-	# xml_name="rev"
-	# def __init__(self,xml_node=None,dico=None,**kargs_if_creation):
-		# self.list_value=[]
-		# if xml_node==None:
-			# self.date	= WWDate()
-			# for y in kargs_if_creation.keys():
-				# self.list_value.append(y)
-				# self.__dict__[y]=kargs_if_creation[y]
-		# else : 
-			# if not xml_node.hasAttribute('name'):
-			# # if not xml_node.hasDirectElementsByTagName('name'):
-				# raise WWErrorXML("The revision node has no attribute <name>.")
-			# # if not xml_node.hasDirectElementsByTagName('date'):
-			# if not xml_node.hasAttribute('date'):
-				# raise WWErrorXML("The revision node has no attribute <date>.")
-				
-			
-			# self.name	= xml_node.getAttribute('name')
-			# self.date	= WWDate(xml_node.getAttribute('date'))
-			
-			# keyss=xml_node.attributes.keys()[:]
-			# keyss.remove('name')
-			# keyss.remove('date')
-			
-			# for y in keyss:
-				# assert y in dico.keys()
-				# self.list_value.append(y)
-				# self.__dict__[y]=dico[y](xml_node.getAttribute(y))
-				
-			
-	# def xml_output(self,doc,parentNode):
-		# node=doc.createElement(self.xml_name)
-		# node.setAttribute("name", self.name)
-		# for i in self.list_value[::-1]: node.setAttribute(i,unicode(self.__dict__[i]))
-		# node.setAttribute("date", unicode(self.date))		
-		# parentNode.appendChild(node)
-
-	
-# class WWWordTools:
-	# IND_LOWER=1
-	# IND_FIRST_CAP=2
-	# IND_ALL_CAP=4
-	
-	# @staticmethod
-	# def whatID(word):
-		# if len(word)==0:
-			# return False
-		# elif word.isupper():
-			# if len(word)==1:
-				# return WWWordTools.IND_FIRST_CAP
-			# else:
-				# return WWWordTools.IND_ALL_CAP
-		# elif word[0].isupper():
-			# return WWWordTools.IND_FIRST_CAP
-		# else:
-			# return WWWordTools.IND_LOWER
-
-	# @staticmethod
-	# def toID(word,id):
-		# word=unicode(word)
-		# if id==WWWordTools.IND_FIRST_CAP:
-			# word=string.capwords(word,sep=u'-')
-
-				
-		# elif id==WWWordTools.IND_ALL_CAP:
-			# word=word.upper()
-		# return word
-	
-    # # whatID = staticmethod(whatID)
-    # # toID = staticmethod(toID)
-
-# class WWWordSet:
-	# def __init__(self,data_list=None):
-		# self.dico={}
-		# if data_list!=None:
-			
-			# self.input_from_list(data_list)
-	
-	# def addWord(self,word_entry,id=None):
-		# word_entry=unicode(word_entry).lower()
-		# if id==None:
-			# id=WWWordTools.IND_LOWER|WWWordTools.IND_FIRST_CAP|WWWordTools.IND_ALL_CAP
-		
-		# self.dico[word_entry]=id
-	
-	
-	
-	# def removeWord(self,word):
-		# word=unicode(word).lower()
-		# if self.dico.has_key(word):
-			# self.dico.remove(word)
-			# return True
-		# else:
-			# return False
-	
-	# def yieldSet(self):
-		# list_id=[WWWordTools.IND_LOWER,WWWordTools.IND_FIRST_CAP,WWWordTools.IND_ALL_CAP]
-		# for word,id in self.dico.items():
-			# for id_tmp in list_id:
-				# if id_tmp&id>0:
-					# yield WWWordTools.toID(word,id_tmp)
-
-		
-	
-	# def isIn(self,word):
-		# word=unicode(word)
-		# word_tmp=unicode(word).lower()
-		# coresp=self.dico.get(word_tmp,False)
-		# if not coresp: return False
-		# id=WWWordTools.whatID(word)
-		# if (id&coresp)>0:
-			# return True
-	# def input_from_list(self,data_list):
-		# for data in data_list:
-			# id=WWWordTools.whatID(data)
-			# self.addWord(data,id)
-	
-	# # def get(self,word):
-		# # word=unicode(word)
-		# # word_tmp=unicode(word).lower()
-		# # coresp=self.dico.get(word_tmp,False)
-		# # if not coresp: return False
-		# # id=WWWordTools.whatID(word)
-		# # if id|coresp[1]>0:
-			
-			# # return WWWordTools.toID(coresp[0],id)
-		# # else: return False
-	
-		
-	
-	
-# class WWWordDico:
-	# def __init__(self,data_list=None):
-		# self.dico={}
-		# if data_list!=None:
-			
-			# self.input_from_CONSTANTS(data_list)
-	
-	# def addWord(self,word_entry,word_out,id=None):
-		# word_entry=unicode(word_entry)
-		# word_out=unicode(word_out)
-		# if id==None:
-			# id=WWWordTools.IND_LOWER|WWWordTools.IND_FIRST_CAP|WWWordTools.IND_ALL_CAP
-		
-		# self.dico[word_entry]=(word_out,id)
-	
-	# def get(self,word):
-		# word=unicode(word)
-		# word_tmp=unicode(word).lower()
-		# coresp=self.dico.get(word_tmp,False)
-		# if not coresp: return False
-		# id=WWWordTools.whatID(word)
-		# if id|coresp[1]>0:
-			
-			# return WWWordTools.toID(coresp[0],id)
-		# else: return False
-	
-	# def input_from_CONSTANTS(self,data_list):
-		# for data in data_list:
-			# # print "data : ",data.encode('ascii','replace')
-			# data_tmp=data.strip()
-			# i=data_tmp.find(' ')
-			# if i!= -1:
-				# k=data_tmp[:i]
-				# v=data_tmp[i:].strip()
-				# self.addWord(k,v)
-	
-	# def output_for_CONSTANTS(self):
-		# data_list=[]
-		# for k in self.dico.keys():
-			# data_list.append(k+' '+self.dico[k])
-
-		# return data_list
 
 # add a simple function to the QCheckBox that return the checked state of the CheckBox
 def isChecked_WW(self):

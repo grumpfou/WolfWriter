@@ -1,19 +1,3 @@
-from PyQt4 import QtGui, QtCore
-
-import os
-import codecs
-import subprocess
-import sys
-
-from WolfWriterTreeView import *
-from WolfWriterTextEdit import *
-from WolfWriterBook import *
-from WolfWriterTabWidget import *
-from WolfWriterCommon import *
-from WolfWriterExport import *
-from WolfWriterError import *
-
-
 """
 Part of the WolfWriter project. Written by Renaud Dessalles
 Contains a reimplementation of the QMainWindow. It contains all the elements of the
@@ -30,6 +14,20 @@ The setup_ method of the WWMainWindow class are quite straightforward. They are 
 initiation of the class.
 Every action has its own slot and are discribed in the setup_actions method.
 """
+from PyQt4 import QtGui, QtCore
+
+import os
+import codecs
+import subprocess
+import sys
+
+from WolfWriterTreeView 	import *
+from WolfWriterTextEdit 	import *
+from WolfWriterBook 		import *
+from WolfWriterTabWidget 	import *
+from WolfWriterCommon 		import *
+from WolfWriterExport 		import *
+from WolfWriterError 		import *
 
 
 

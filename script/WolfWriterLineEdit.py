@@ -11,12 +11,16 @@ from WolfWriterCharTable import *
 
 class WWLineEdit(QtGui.QLineEdit):
 	def __init__(self,language_name=None,*args,**kargs):
+		"""
+		- language_name : the name of the language to consider. If None it takes the 
+				DFT_WRITING_LANGUAGE.
+		"""
 		QtGui.QLineEdit.__init__(self,*args,**kargs)
 		self.actionLaunchCharWidgetTable=QtGui.QAction("&Special Characters",self)		
 		self.actionLaunchCharWidgetTable.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"character-set.png")))
 		self.connect(self.actionLaunchCharWidgetTable, QtCore.SIGNAL("triggered()"), self.SLOT_launchCharWidgetTable)
 		
-		
+		# fill self.language according to the language language_name
 		if language_name==None:
 			self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
 		else :
@@ -26,6 +30,8 @@ class WWLineEdit(QtGui.QLineEdit):
 			else:
 				self.language=WWLanguageDico[language_name]()
 		dico=self.language.shortcuts_insert
+		
+		# add the language insert shortcuts to the class
 		mapper = QtCore.QSignalMapper(self)
 		for k in dico.keys():
 			short=QtGui.QShortcut(QtGui.QKeySequence(*k),self)
@@ -35,12 +41,16 @@ class WWLineEdit(QtGui.QLineEdit):
 		self.connect(mapper, QtCore.SIGNAL("mapped(const QString &)"), self.insert )
 
 	def contextMenuEvent(self,event):
+		"""
+		The context menu shoulb be able to display the char table
+		"""
 		menu=self.createStandardContextMenu ()
 		menu.addAction(self.actionLaunchCharWidgetTable)
 		menu.exec_(event.globalPos())
 	
 
 	def SLOT_launchCharWidgetTable(self):
+		"""Slot that is called to display the char table"""
 		charWid=WWCharWidgetTable(linked_text_widget=self,parent=self,flags = QtCore.Qt.Tool)#, flag = QtCore.Qt.Dialog)
 		rect=self.cursorRect()
 		charWid.move(self.mapToGlobal (rect.bottomRight ()))

@@ -1,14 +1,3 @@
-
-
-from PyQt4 import QtGui, QtCore
-from WolfWriterCommon import *
-from WolfWriterBook import *
-from WolfWriterScene import *
-# from WolfWriterChapterScene import *
-import sys
-import string
-import os
-
 """
 Part of the WolfWriter project. Written by Renaud Dessalles
 This file contain three classes which are involved in the graphical representation of the
@@ -25,22 +14,31 @@ This file contain three classes which are involved in the graphical representati
 	- the __init__ function is asking for the header. It is a list of the data we want to
 	show. The information of an object (scene/chapter/story) is obtained via the method
 	getInfo of WWStory, WWChapters and WWScene classes.
-	- every index is associate with the corresponding item (WWTreeItem) of its line via 
-	the method getItem.
-- WWTreeItem represent a single item in the tree (mainly, it know its parent, and its 	
-	children) and is associate with a WWStory, WWChapters and WWScene object.
-
-Note : WWTreeItem is quite redondant with the WWStory, WWChapters and WWScene classes.
-I plan to merge this class with the WWStory, WWChapters and WWScene in a further
- version of WolfWriter.
+	- every index is associate with the corresponding object (WWStory, WWChapter and 
+	WWScene).
 """
+from PyQt4 import QtGui, QtCore
 
+import sys
+import string
+import os
+
+from WolfWriterCommon	import *
+from WolfWriterBook 	import *
+from WolfWriterScene 	import *
 
 
 
 
 class WWTreeView(QtGui.QTreeView):
 	def __init__(self,story,parent=None,main_window=None):
+		""" This class is a re-implementation of QTreeView which w<ill display the 
+		structure of the story.
+		- story : the WWScene to display (TODO : it would be better if it was a WWStructure
+		- parent : the parent widget
+		- main_window : the possible WWMainWindow that is above the WWTreeView (to know 
+			what is the active scene etc.
+		"""
 		QtGui.QTreeView.__init__(self,parent)			
 		self.main_window=main_window
 		model=WWTreeModel(story,parent=self)
@@ -53,82 +51,83 @@ class WWTreeView(QtGui.QTreeView):
 		self.model().story=story
 		
 	def setup_actions(self):
-		# self.actionRemoveRow=QtGui.QAction("&Remove row",self)
-		# self.connect(self.actionRemoveRow, QtCore.SIGNAL("triggered()"), self.SLOT_removeRow )
-		
-		# self.actionInsertRow=QtGui.QAction("&Insert row",self)
-		# self.connect(self.actionInsertRow, QtCore.SIGNAL("triggered()"), self.SLOT_insertRow )
-		
+		"""
+		This method is called at the very beinging to create the different actions.
+		"""
+
+		# actionAddChapter : add a chapter after the current row position
 		self.actionAddChapter=QtGui.QAction("&Add Chapter after",self)
 		self.actionAddChapter.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"add_chap.png")))
 		self.addAction(self.actionAddChapter)
 		self.connect(self.actionAddChapter, QtCore.SIGNAL("triggered()"), self.SLOT_addChapter )
 		
+		# actionAddChapterBefore : add a chapter before the current row position
 		self.actionAddChapterBefore=QtGui.QAction("&Add Chapter before",self)
-		# self.actionAddChapter.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"add_chap.png")))
 		self.addAction(self.actionAddChapterBefore)
 		self.connect(self.actionAddChapterBefore, QtCore.SIGNAL("triggered()"), self.SLOT_addChapterBefore )
 
+		# actionAddScene : add a chapter after the current row position
 		self.actionAddScene=QtGui.QAction("&Add Scene after",self)
 		self.actionAddScene.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"add_scene.png")))
 		self.addAction(self.actionAddScene)
 		self.connect(self.actionAddScene, QtCore.SIGNAL("triggered()"), self.SLOT_addScene )
 		
+		# actionAddSceneBefore : add a chapter before the current row position
 		self.actionAddSceneBefore=QtGui.QAction("&Add Scene before",self)
-		# self.actionAddSceneBefore.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"add_scene.png")))
 		self.addAction(self.actionAddSceneBefore)
 		self.connect(self.actionAddSceneBefore, QtCore.SIGNAL("triggered()"), self.SLOT_addSceneBefore )
 		
-		
+		# actionMoveObjectUp: move the chapter/scene above 
+		# (if we move a scene which is at the begining of the chapter, we move it at the 
+		# end of the previous chapter.)
 		self.actionMoveObjectUp=QtGui.QAction("&Move object up",self)
 		self.actionMoveObjectUp.setShortcuts(QtGui.QKeySequence("Ctrl+Up"))
 		self.actionMoveObjectUp.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"1uparrow.png")))
 		self.addAction(self.actionMoveObjectUp)
 		self.connect(self.actionMoveObjectUp, QtCore.SIGNAL("triggered()"), self.SLOT_actionMoveObjectUp )
 
+		# actionMoveObjectDown: move the chapter/scene below 
+		# (if we move a scene which is at the end of the chapter, we move it at the 
+		# begining of the next chapter.)
 		self.actionMoveObjectDown=QtGui.QAction("&Move object down",self)
 		self.actionMoveObjectDown.setShortcuts(QtGui.QKeySequence("Ctrl+Down"))
 		self.actionMoveObjectDown.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"1downarrow.png")))
 		self.addAction(self.actionMoveObjectDown)
 		self.connect(self.actionMoveObjectDown, QtCore.SIGNAL("triggered()"), self.SLOT_actionMoveObjectDown )
 
+		# actionChangeTitleObject: change chapter/scene's title
 		self.actionChangeTitleObject=QtGui.QAction("&Change object's title",self)
 		self.addAction(self.actionChangeTitleObject)
 		self.actionChangeTitleObject.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"applixware.png")))
 		self.connect(self.actionChangeTitleObject, QtCore.SIGNAL("triggered()"), self.SLOT_changeTitleObject )		
 		
+		# actionRemoveObject: remove chapter/scene. (Do not do anything if it is the last 
+		# scene of a chapter or the last chapter of a story.)
 		self.actionRemoveObject=QtGui.QAction("&Remove the selected object",self)
 		self.actionRemoveObject.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"del_object.png")))
 		self.actionRemoveObject.setShortcuts(QtGui.QKeySequence.Delete)
 		self.addAction(self.actionRemoveObject)
 		self.connect(self.actionRemoveObject, QtCore.SIGNAL("triggered()"), self.SLOT_removeObject )
 		
-		# self.actionRefresh=QtGui.QAction("&Refresh the informations",self)
-		# self.actionRefresh.setShortcuts(QtGui.QKeySequence.Refresh)
-		# self.connect(self.actionRefresh, QtCore.SIGNAL("triggered()"), self.SLOT_actionRefresh)
-		
+		# if an object is activated, it calls the SLOT_activated
 		self.connect(self, QtCore.SIGNAL("activated (const QModelIndex & )"), self.SLOT_activated )
 		
 		
-		# self.actionTest=QtGui.QAction("&Test",self)
-		# self.connect(self.actionTest, QtCore.SIGNAL("triggered()"), self.SLOT_test )
 	
-	def mouseDoubleClickEvent(self,event):
-		#prevent or roll/deroll the chaper
-		QtGui.QAbstractItemView.mouseDoubleClickEvent(self,event)
+	# def mouseDoubleClickEvent(self,event):
+		# #prevent or roll/deroll the chaper
+		# QtGui.QAbstractItemView.mouseDoubleClickEvent(self,event)
 	
 	
 	
 	############### SLOTS ###############
-	# def SLOT_removeRow(self):
-		# index=self.selectionModel().currentIndex()
-		# self.model().removeRows(index.row(),1,index.parent())
-	# def SLOT_insertRow(self):
-		# index=self.selectionModel().currentIndex()
-		# self.model().insertRows(index.row(),1,index.parent())
-	def SLOT_test(self):
-		print 'test'		
 	def SLOT_addChapter(self,place=0,with_activation=True):
+		"""Add a chapter and it's first scene relatively to the row of the current index.
+		place : the position where to insert the chapter in the story relative to the row 
+			of the current index. (0 : just after, -1 : just before)
+		with_activation : if we have to change the active scene of 
+			self.main_window.sceneEdit to the newly created WWScene ?
+		"""
 		index=self.selectionModel().currentIndex()
 		dist=index.distanceToRoot()
 		
@@ -143,16 +142,19 @@ class WWTreeView(QtGui.QTreeView):
 			index=index.parent()
 		
 			
-			
-		chap_title = QtGui.QInputDialog.getText(self, "Nouveau Chapitre", "Quel est le titre du nouveau chapitre ?")
+		# Get the titles
+		chap_title = QtGui.QInputDialog.getText(self, "New Chapter", "What is the title of the new chapter?")
 		if not chap_title[1]:
 			return False
-		scne_title = QtGui.QInputDialog.getText(self, "Premiere Scene", "Quel est le titre de la premiere scene ?")
+		scne_title = QtGui.QInputDialog.getText(self, "First Scene", "What is the title of the first scene of the chapter?")
 		if not scne_title[1]:
 			return False
 		
-		if unicode(scne_title[0])!=u'': new_scene=self.model().story.parent.create_new_scene(title=scne_title[0])
-		else : new_scene=self.model().story.parent.create_new_scene()
+		# If no title given, we take the default one
+		if unicode(scne_title[0])!=u'':
+			new_scene=self.model().story.parent.create_new_scene(title=scne_title[0])
+		else :
+			new_scene=self.model().story.parent.create_new_scene()
 			
 		if unicode(chap_title[1])!=u'':
 			new_chapter=WWChapter(xml_node=None,
@@ -164,7 +166,7 @@ class WWTreeView(QtGui.QTreeView):
 					parent=self.model().story,
 					)
 			
-		
+		# We insert the newly created Chapter and Scene
 		self.model().insertRows(row,1,index,list_objects=[new_chapter])
 		index=self.model().index(row,0,index)
 		self.model().insertRows(0,1,index,list_objects=[new_scene])
@@ -175,12 +177,18 @@ class WWTreeView(QtGui.QTreeView):
 			self.SLOT_activated(index)
 		return True
 
-	def SLOT_addChapterBefore(self):
-		self.SLOT_addChapter(place=-1)
+	def SLOT_addChapterBefore(self,*args,**kargs):
+		"""Insert a chapter just before the row of the current index"""
+		self.SLOT_addChapter(place=-1,*args,**kargs)
 		
 		
 	def SLOT_addScene(self,place=0,with_activation=True):
-	
+		"""Add a scene relatively to the row of the current index.
+		place : the position where to insert the scene in the story relative to the row 
+			of the current index. (0 : just after, -1 : just before)
+		with_activation : if we have to change the active scene of 
+			self.main_window.sceneEdit to the newly created WWScene ?
+		"""
 		index=self.selectionModel().currentIndex()
 		dist=index.distanceToRoot()
 	
@@ -206,8 +214,16 @@ class WWTreeView(QtGui.QTreeView):
 				self.SLOT_activated(index)
 
 	def SLOT_addSceneBefore(self):
+		"""Insert a scene just before the row of the current index"""
 		self.SLOT_addScene(place=-1)
+		
 	def SLOT_actionMoveObjectUp(self):
+		"""Move the object at the current index just above.
+		If the object is the first scene of a middle chapter, it will move it at the last 
+		place of the previous chapter.
+		It the object is the first chapter or the first scene of the first chapter, it 
+		does nothing.
+		"""
 		index=self.selectionModel().currentIndex()
 		row=index.row()
 		dist=index.distanceToRoot()
@@ -247,6 +263,12 @@ class WWTreeView(QtGui.QTreeView):
 	
 			
 	def SLOT_actionMoveObjectDown(self):
+		"""Move the object at the current index just bellow.
+		If the object is the last scene of a middle chapter, it will move it at the first 
+		place of the next chapter.
+		It the object is the last chapter or the last scene of the last chapter, it 
+		does nothing.
+		"""		
 		index=self.selectionModel().currentIndex()
 		row=index.row()
 		dist=index.distanceToRoot()
@@ -287,9 +309,11 @@ class WWTreeView(QtGui.QTreeView):
 	
 		
 	def SLOT_removeObject(self,index=None,with_activation=True,with_confirm_msg=True):
-		#index : the index of the object to remove
-		#with_activation : change the active scene in self.main_window if we delete it
-		#with_confirm_msg : ask for a confirmation before making deletion
+		"""Remove the object at a given index.
+		index : the index of the object to remove (if none, then we take the current index)
+		with_activation : change the active scene in self.main_window if we delete it
+		with_confirm_msg : ask for a confirmation before making deletion
+		"""
 		if index==None :index=self.selectionModel().currentIndex()
 		row=index.row()
 		dist=index.distanceToRoot()
@@ -334,15 +358,20 @@ class WWTreeView(QtGui.QTreeView):
 				
 		
 	def SLOT_activated (self,index) :
+		"""Method that emit the signal "objectActivated" and the object of the activated 
+		index."""
 		item=self.model().getItem(index)
 		
 		self.emit(QtCore.SIGNAL("objectActivated (PyQt_PyObject)"),  item)
 			
 
 	def SLOT_emitChanged(self):
+		"""Method that emit the signal "changed" to inform WolfWriter that someting has 
+		been changed in the structure of the book."""
 		self.emit(QtCore.SIGNAL("changed ()"))
 	
 	def SLOT_changeTitleObject(self):
+		"""Method that will allow to change the Chapter/Scene title."""
 		index=self.selectionModel().currentIndex()
 		item=self.model().getItem(index)
 		if isinstance(item,WWScene):
@@ -354,12 +383,17 @@ class WWTreeView(QtGui.QTreeView):
 			item.title=unicode(newname[0])
 			self.SLOT_emitChanged()
 
-	# def SLOT_actionRefresh(self):
-		# self.model().refresh_all()
 		
 		
 	#####################################
 	def activateNextScene(self,start_index=None):
+		"""Will emit an "activated" signal on the index corresponding to the first scene comming after start_index.
+		- start_index : the index to start with, if None, it takes the current index.
+		If the index is the one of a chapter, it gives the first of its scene.
+		If the index is the one of the last scene of a middle chapter, it gives the first 
+			scene of the next chapter.
+		If the index is the one of the last scene of the last chapter, it does nothing.
+		"""
 		if start_index==None:
 			index=self.selectionModel().currentIndex()
 		else:
@@ -374,6 +408,13 @@ class WWTreeView(QtGui.QTreeView):
 		self.emit(QtCore.SIGNAL("activated(const QModelIndex & )"),  index)
 		
 	def activatePrevScene(self,start_index=None):
+		"""Will emit an "activated" signal on the index corresponding to the first scene comming before start_index.
+		- start_index : the index to start with, if None, it takes the current index.
+		If the index is the one of a chapter, it gives the last of its scene.
+		If the index is the one of the first scene of a middle chapter, it gives the last 
+			scene of the previous chapter.
+		If the index is the one of the first scene of the first chapter, it does nothing.
+		"""		
 		if start_index==None:
 			index=self.selectionModel().currentIndex()
 		else:
@@ -389,6 +430,7 @@ class WWTreeView(QtGui.QTreeView):
 		
 		
 	def getIndex(self,item):
+		"""Will give the index of a given object."""				
 		if item==self.model().story:
 			return self.rootIndex ()
 		else:
@@ -401,6 +443,7 @@ class WWTreeView(QtGui.QTreeView):
 		
 		
 	def getToolBar(self,parent):
+		"""Give the toolbar with all the actions"""
 		toolBar=QtGui.QToolBar ("ToolBar",parent)
 		toolBar.addAction(self.actionAddChapter)
 		toolBar.addAction(self.actionAddScene)
@@ -412,6 +455,12 @@ class WWTreeView(QtGui.QTreeView):
 
 class WWTreeModel (QtCore.QAbstractItemModel):
 	def __init__(self,story,headers=None,parent=None):
+		""" A quite classic re-implementation of the QAbstractItemModel
+		- story : the WWStory instance, it will represent the root of the tree
+			Note: Choose the WWStructure should be more coherent
+		- headers : list of the informations asked to be displayed
+		- parent: the WWTreeView
+		"""
 		QtCore.QAbstractItemModel.__init__(self,parent=parent)
 		if headers==None:
 			headers=["title","numberWords"]
@@ -504,8 +553,8 @@ class WWTreeModel (QtCore.QAbstractItemModel):
 				# # self.removeRows(0,len(childItem.children),childIndex)
 		
 		## removes children
-		if rows==len(parentItem.children): last=position + rows 
-		else: last=position + rows - 1
+		if rows==len(parentItem.children): last=position + rows #to deal with complicated behaviour of beginRemoveRows
+		else: last=position + rows - 1                          #to deal with complicated behaviour of beginRemoveRows
 		self.beginRemoveRows(parent, position, position + rows - 1)
 		removed = parentItem.removeChildren(position, rows)
 		self.endRemoveRows()
@@ -517,9 +566,9 @@ class WWTreeModel (QtCore.QAbstractItemModel):
 			parent_end=parent_init
 			
 			if pos_init<=pos_end:
-				pos_end_qt=pos_end+1
+				pos_end_qt=pos_end+1 #to deal with complicated behaviour of beginMoveRows
 			else:
-				pos_end_qt=pos_end
+				pos_end_qt=pos_end #to deal with complicated behaviour of beginMoveRows
 		else:
 			pos_end_qt=pos_end
 	
@@ -533,6 +582,8 @@ class WWTreeModel (QtCore.QAbstractItemModel):
 		self.endMoveRows ()
 			
 	def getItem(self,index):
+		"""Function that return the given object (WWStory, WWChapter or WWScene) at the 
+		given index"""
 		if (index.isValid()) :
 			item = index.internalPointer()
 			if (item) :
@@ -543,33 +594,36 @@ class WWTreeModel (QtCore.QAbstractItemModel):
 
 			
 	def nextIndex(self,index,with_children=True):
-		# This function get the next index that comes after the one in entry:
-		# If it has a child, it will gives the first child (excepect if with_children is false)
-		# Otherwise, it gives the next sibling
-		# If there is no sibling, it gives the parents' next brother
-		# If the index is the last one, then it return an invalid index
-		# Example :
-		#
-		#	S___1___11
-		#	 |   |__12
-		#	 |
-		#	 |__2___21
-		#	     |__22
-		#
-		#>>> WWTreeModel.nextIndex(index_of_21,with_children=True)
-		#    index_of_22 #the next sibling of 21 (because, 21 has no child)
-		#>>> WWTreeModel.nextIndex(index_of_21,with_children=False)
-		#    index_of_22 #the next sibling of 21
-		#>>> WWTreeModel.nextIndex(index_of_12,with_children=True)
-		#    index_of_1 #the parent of 12 (because, 12 has no child)
-		#>>> WWTreeModel.nextIndex(index_of_12,with_children=False)
-		#    index_of_1 #the parent of 12		
-		#>>> WWTreeModel.nextIndex(index_of_1,with_children=True)
-		#    index_of_11 #the first child of 1
-		#>>> WWTreeModel.nextIndex(index_of_1,with_children=False)
-		#    index_of_2 #the next sibling of 1
-		#>>> WWTreeModel.nextIndex(index_of_2,with_children=False)
-		#    index_of_S #the seed		
+		"""
+		This function get the next index that comes after the one in entry:
+		If it has a child, it will gives the first child (excepect if with_children is
+		false)
+		Otherwise, it gives the next sibling
+		If there is no sibling, it gives the parents' next brother
+		If the index is the last one, then it return an invalid index
+		Example :
+		
+			S___1___11
+			 |   |__12
+			 |
+			 |__2___21
+			     |__22
+		
+		>>> WWTreeModel.nextIndex(index_of_21,with_children=True)
+		    index_of_22 #the next sibling of 21 (because, 21 has no child)
+		>>> WWTreeModel.nextIndex(index_of_21,with_children=False)
+		    index_of_22 #the next sibling of 21
+		>>> WWTreeModel.nextIndex(index_of_12,with_children=True)
+		    index_of_1 #the parent of 12 (because, 12 has no child)
+		>>> WWTreeModel.nextIndex(index_of_12,with_children=False)
+		    index_of_1 #the parent of 12		
+		>>> WWTreeModel.nextIndex(index_of_1,with_children=True)
+		    index_of_11 #the first child of 1
+		>>> WWTreeModel.nextIndex(index_of_1,with_children=False)
+		    index_of_2 #the next sibling of 1
+		>>> WWTreeModel.nextIndex(index_of_2,with_children=False)
+		    index_of_S #the seed		
+		"""
 		if with_children and self.rowCount(index)>0:   #if the node has children, we give the first child
 			return self.index(0,index.column(),index)
 		
@@ -585,34 +639,35 @@ class WWTreeModel (QtCore.QAbstractItemModel):
 		return self.nextIndex(parent_index,with_children=False) # we search for the next index after the parent one
 		
 	def prevIndex(self,index,with_children=True):
-		# This function get the previous index that comes before the one in entry:
-		# If it has a child, it will gives the last child (excepect if with_children is false)
-		# Otherwise, it gives the previous sibling
-		# If there is no sibling, it gives the parents' previous brother
-		# If the index is the first one, then it return an invalid index	
-		# Example :
-		#
-		#	S___1___11
-		#	 |   |__12
-		#	 |
-		#	 |__2___21
-		#	     |__22
-		#
-		#>>> WWTreeModel.prevIndex(index_of_22,with_children=True)
-		#    index_of_21 #the previous sibling of 22 (because, 22 has no child)
-		#>>> WWTreeModel.prevIndex(index_of_22,with_children=False)
-		#    index_of_21 #the previous sibling of 22
-		#>>> WWTreeModel.prevIndex(index_of_21,with_children=True)
-		#    index_of_2 #the parent of 21 (because, 21 has no child)
-		#>>> WWTreeModel.prevIndex(index_of_21,with_children=False)
-		#    index_of_2 #the parent of 21
-		#>>> WWTreeModel.prevIndex(index_of_2,with_children=True)
-		#    index_of_22 #the last child of 2
-		#>>> WWTreeModel.prevIndex(index_of_2,with_children=False)
-		#    index_of_1 #the previous sibling of 2
-		#>>> WWTreeModel.prevIndex(index_of_1,with_children=False)
-		#    index_of_S #the seed		
+		"""
+		This function get the previous index that comes before the one in entry:
+		If it has a child, it will gives the last child (excepect if with_children is false)
+		Otherwise, it gives the previous sibling
+		If there is no sibling, it gives the parents' previous brother
+		If the index is the first one, then it return an invalid index	
+		Example :
 		
+			S___1___11
+			 |   |__12
+			 |
+			 |__2___21
+			     |__22
+		
+		>>> WWTreeModel.prevIndex(index_of_22,with_children=True)
+		   index_of_21 #the previous sibling of 22 (because, 22 has no child)
+		>>> WWTreeModel.prevIndex(index_of_22,with_children=False)
+		   index_of_21 #the previous sibling of 22
+		>>> WWTreeModel.prevIndex(index_of_21,with_children=True)
+		   index_of_2 #the parent of 21 (because, 21 has no child)
+		>>> WWTreeModel.prevIndex(index_of_21,with_children=False)
+		   index_of_2 #the parent of 21
+		>>> WWTreeModel.prevIndex(index_of_2,with_children=True)
+		   index_of_22 #the last child of 2
+		>>> WWTreeModel.prevIndex(index_of_2,with_children=False)
+		   index_of_1 #the previous sibling of 2
+		>>> WWTreeModel.prevIndex(index_of_1,with_children=False)
+		   index_of_S #the seed		
+		"""
 		if with_children and self.rowCount(index)>0:  #if the node has children, we give the last child
 			return self.index(self.rowCount(index)-1,index.column(),index)
 		

@@ -1,27 +1,48 @@
+"""
+Part of the WolfWriter project. Written by Renaud Dessalles
+Contains re-implementations of the WWNodeFirstAbstract and WWNodeAbstract (cf WolfWriterNodeXML.py). These class correspond mainly to the informations that are contained in the encyclopedia.xml.
+- WWEncyclopedia : class tht will contain the list of the entries. It will called to read what is contained in the file encyclopedia.exml. It contains functions that allows to add and remove entries in the encyclopedia.
+- WWEntry : correspond to an entry of the encyclopedia. It contains the name, the description and the other attributes of the entry.
+"""
 from PyQt4 import QtGui, QtCore
+
+import re
+
 from WolfWriterNodeXML import *
 from WolfWriterCommon import *
 from WolfWriterWord import *
 from WolfWriterLineEdit import *
-import re
 
 class WWEncyclopedia (WWNodeFirstAbstract):
 	xml_name="encyclopedia"
 	dico_attributes={} 
 	
 	def __init__(self,filepath,book=None,new=False,parent_file=None,**kargs_if_creation):
+		"""
+		- filepath : the place where to read the encyclopedia.xml file
+		- book : the corresponding WWBook instance
+		- parent_file : should be None
+		- **kargs_if_creation : should be None
+		"""
 		WWNodeFirstAbstract.__init__(self,filepath,new=new,parent_file=parent_file,**kargs_if_creation)	
 		self.book=book
 		
-		self.word_set=WWWordSet()
-		self.list_entry=[]
+		self.word_set=WWWordSet() # This set will contain all the names (the entries 
+				# but also the other names; inflexions of the word etc.). It allows 
+				# also to specify all possible the capitalization of the words.
+		self.list_entry=[] # List of the all the WWEntry instances.
+		
+		# We fill the self.list_entry :
 		for entry_node in self.xml_node.getDirectElementsByTagName(u"entry"):
 			self.list_entry.append(WWEntry(xml_node=entry_node,parent=self))
-			# self.add_fromNode(entry_node)
+		# We fill the self.word_set :
 		self.fillingWordSet()
 	
 			
 	def fillingWordSet(self):
+		"""
+		Function that fill the self.word_set fromself.list_entry.
+		"""
 		self.word_set=WWWordSet()
 		for entry in self.list_entry:
 			if entry.properName: # if it is a proper name we do not allow the word to be in a lower form
@@ -35,6 +56,14 @@ class WWEncyclopedia (WWNodeFirstAbstract):
 		
 			
 	def addEntry(self,name,type=None,desc=None,other_names=None):
+		"""
+		Function that is called when creating a new entry and add it to the 
+		encyclopedia :
+		- name : the name of the new entry
+		- type : the type of the entry
+		- desc : the description of the new entry
+		- other_names : the list of the other names that discribe the entry.
+		"""
 		if type==None: type=""
 		if other_names==None: other_names=[]
 		if desc==None: desc=""
@@ -42,57 +71,18 @@ class WWEncyclopedia (WWNodeFirstAbstract):
 		self.list_entry.append(entry)
 		self.fillingWordSet()
 		return entry
-
-	# def addEntry_X(self,name=None,type=None,desc=None,other_names=None,parent=None):
-		# if name==None: name=""
-		# if type==None: type=""
-		# if other_names==None: other_names=[]
-		# if desc==None: desc=""
-		
-		# entry=WWEntry(xml_node=None,parent=self,name=name,other_names=other_names,type=type,desc=desc)
-		# dialog=entry.attributeDialog_X(parent=parent)
-		# res=dialog.exec_()
-		# if res==1:
-			# self.list_entry.append(entry)
-			# self.fillingWordSet()
-		
-		# return bool(res)
 	
 	def removeEntry(self,entry):
+		"""Will remove the given entry"""
 		if not entry in self.list_entry:
 			return False
 		self.list_entry.remove(entry)
 		self.fillingWordSet()
 		return True
-
-	# def removeEntryFromName_X(self,name,parent=None):
-		# if not self.word_set.isIn(name):
-			# return False
-			
-		# list_possible_entries=self.getEntriesWithName(name)
-		# if len(list_possible_entries)>1:
-			# dialog=QtGui.QInputDialog()
-			# list_name=[l.name for l in list_possible_entries]
-			# name_to_pop,res=dialog.getItem(parent,"Entry selection","Please chose the entry",list_name)
-			# if not res: return False
-			# to_pop=list_possible_entries[list_name.index(name_to_pop)]
-		# else:
-			# to_pop=list_possible_entries[0]
-		
-		# mess=QtGui.QMessageBox()
-		# ans = mess.question(parent, "Confirmation",										\
-				# u"Are you sure to remove the entry <"+to_pop.name+"> from the Ency ?",  \
-				# QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-		
-		# if ans == QtGui.QMessageBox.No:
-			# return False
-		# self.list_entry.remove(to_pop)
-		# self.fillingWordSet()
-		# return True
-			
-				
 		
 	def accessEntryFromName_X(self,name,parent=None):
+		# Note: not used anymore.
+		raise NotImplementedError
 		if not self.word_set.isIn(name):
 			return False
 			
@@ -114,15 +104,23 @@ class WWEncyclopedia (WWNodeFirstAbstract):
 			
 		
 	def getEntriesWithName(self,name):
-		print "name  :  ",unicode(name).encode('ascii','replace')		
+		"""
+		Will give a list of entry that might correspond to the given name.
+		It will search the entry's name and in the entry's other name to find it.
+		Here the given name should be exact.
+		"""
 		list_possible_entries=[]
 		for entry in self.list_entry:
-			print "HEHO !"
 			if entry.compare(name):
 				list_possible_entries.append(entry)
 		return list_possible_entries
 		
 	def searchEntriesWithName(self,name):
+		"""
+		Will give a list of entry that might correspond to the given name.
+		It will search the entry's name and in the entry's other name to find it.
+		Here the given name is a regular expression to find.
+		"""
 		# to_search=name+u".*"
 		to_search=u".*"+name+u".*"
 		list_possible_entries=[]
@@ -133,6 +131,11 @@ class WWEncyclopedia (WWNodeFirstAbstract):
 		
 		
 	def hasEntry(self,data):
+		"""
+		Return True if the given data is in the list_entry
+		(data can be a WWEntry instance or it can be a string corrsponding to the 
+		entry's name)
+		"""
 		if isinstance(data,WWEntry):
 			if data in self.list_entry:
 				return True
@@ -143,12 +146,23 @@ class WWEncyclopedia (WWNodeFirstAbstract):
 			else: return False
 		
 	def xml_output(self,doc,parentNode):
+		"""
+		It is called when we have to create the xml file. Adding the nodes to the 
+		parentNode given in entry.
+		"""
 		node=doc.createElement(self.xml_name)
 		for entry in self.list_entry:
 			entry.xml_output(doc,node)
 		parentNode.appendChild(node)	
 
 	def output(self):
+		"""
+		This function is called when exporting the file to another format (.html,
+		.txt, etc.).
+		Note: For now it is not possible to export the encyclopedia.
+		"""
+		
+		
 		res=u""
 		res+=u"Encyclopedia \n\n"
 		for entry in self.list_entry:
@@ -161,6 +175,14 @@ class WWEntry (WWNodeAbstract):
 	xml_name="entry"	
 	dico_attributes={"name":unicode , "type":unicode , "properName":bool} #dictionary : (name:type)
 	def __init__(self,xml_node=None,parent=None,**kargs_if_creation):
+		"""
+		WWEntry will be the representant of the node "entry" in the encyclopedia.xml 
+		file.
+		- xml_node : the XML node that will correspond to the given entry
+		- parent : the Encyclopedia instance
+		- **kargs_if_creation: shall contain the argument usfull for the creation of a 
+				new node : the name the type etc.
+		"""
 		if xml_node!=None:
 			WWNodeAbstract.__init__(self,xml_node,parent)
 			self.read_entry()
@@ -185,6 +207,8 @@ class WWEntry (WWNodeAbstract):
 		
 	
 	def attributeLayout_X(self,parent=None):
+		# Note: not used anymore.
+		raise NotImplementedError
 		language_name=CONSTANTS.DFT_WRITING_LANGUAGE
 		if self.parent.book!=None:
 			language_name=self.parent.book.structure.language
@@ -214,7 +238,8 @@ class WWEntry (WWNodeAbstract):
 		
 		
 	def attributeDialog_X(self,parent=None):
-	
+		# Note: not used anymore.
+		raise NotImplementedError
 		layout_info, name_choose,type_choose,other_names_choose,desc_choose=self.attributeLayout_X()
 		layout_button=QtGui.QHBoxLayout ()
 		generer = QtGui.QPushButton("&Generate")
@@ -246,6 +271,9 @@ class WWEntry (WWNodeAbstract):
 	
 	
 	def read_entry(self):
+		"""
+		Function that will read the XML node and fill the attributes (description etc.)
+		"""
 		self.desc=u""
 		self.other_names=[]
 					
@@ -260,6 +288,10 @@ class WWEntry (WWNodeAbstract):
 		
 			
 	def xml_output(self,doc,parentNode):
+		"""
+		It is called when we have to create the xml file. Adding the nodes to the 
+		parentNode given in entry.
+		"""		
 		node=doc.createElement(self.xml_name)
 		if len(self.other_names)>0:
 			for other_name in self.other_names:
@@ -278,6 +310,12 @@ class WWEntry (WWNodeAbstract):
 
 
 	def output(self):
+		"""
+		This function is called when exporting the file to another format (.html,
+		.txt, etc.).
+		Note: For now it is not possible to export the encyclopedia.
+		"""
+				
 		res=self.get_name_with_other_names()
 		if self.desc!=u"":
 			res+=u': \n'+self.desc
@@ -285,6 +323,10 @@ class WWEntry (WWNodeAbstract):
 		return res
 	
 	def compare(self,name):
+		"""
+		This function look at the name given in entry and compare with it's own name 
+		and the ones in self.other_names. It one correspond, returns True.		
+		"""
 		name_tmp=unicode(name)
 		tmp_list=[self.name]+self.other_names
 		for i in tmp_list:
@@ -297,7 +339,11 @@ class WWEntry (WWNodeAbstract):
 		return False
 		
 	def search(self,to_search):
-		print "to_search  :  ",to_search
+		"""
+		This function look at the regular expression given in entry and compare with 
+		it's own name and the ones in self.other_names. It one correspond, returns 
+		True.		
+		"""		
 		name_tmp=unicode(to_search)
 		tmp_list=[self.name]+self.other_names
 		for i in tmp_list:
@@ -308,7 +354,12 @@ class WWEntry (WWNodeAbstract):
 				# id_name = WWWordTools.whatID(self.name)
 				# if id_name
 		return False
+		
 	def get_name_with_other_names(self):
+		"""
+		Return a string under the form of :
+		name (other_name1 , other_name2 , other_name3)
+		"""
 		res=u""
 		res+=self.name
 		if len(self.other_names)>0:

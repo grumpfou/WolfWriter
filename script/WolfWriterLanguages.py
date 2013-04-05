@@ -6,7 +6,7 @@ It must not be used directly, only subclass should be used.
 
 There is two ways of correcting the typography of the user :
 - by cheaking during the editing : every time the cursor moves (a char is inserted or
-a the user moves the cursor), the software is cheaking if the chars around the place 
+a the user moves the cursor), the software is cheking if the chars around the place 
 leaved by the cursor are correct, and correct them if necessary. The method used to do
 so is correct_between_chars.
 - after a word is written : to correct the previous word etc. The method used to do
@@ -20,16 +20,20 @@ When creating a new Language class, it must contain :
 - the encoding
 - the name of the language (in the language)
 - possibly the shortcuts_insert (a dictionary where the key is a tuple containing 
-the sequence os the shortcut and the value is the string to insert.
+the sequence of the shortcut and the value is the string to insert.
 _ a __init__ method with :
 	a dictionary shortcuts_correction_plugins dict : 
 		key : shortcuts_correction_plugins 
 		value : the name of the pluggin method
-- a reimplementation of the correct_between_chars method
+	self.rules : the list of the rules (contained in the file 
+		WolfWriterLanguagesRules.py) that will be check by the correct_between_chars
+		method. Note that the order of the list is the same in which the rule will be 
+		checked.
 - a possibly reimplementation of the wordCorrection method
-- the possibly method menthion in the values of the shortcuts_correction_plugins
+- the possibly method mentioned in the values of the shortcuts_correction_plugins
 """
 from PyQt4 import QtGui, QtCore
+
 from WolfWriterCommon import  CONSTANTS
 from WolfWriterWord import WWWordTools, WWWordDico
 from WolfWriterLanguagesRules import *
@@ -46,6 +50,9 @@ class WWLanguageAbstract:
 		
 	
 	def correct_between_chars(self,cursor):
+		#Function that will be called everytime the cursor moves. It check the respect
+		#of all the typography rules of the two char of both sides of the position that
+		#the cursor has just left.
 		last_char=self.lastChar(cursor)
 		next_char=self.nextChar(cursor)
 		for rule in self.rules:
@@ -57,6 +64,8 @@ class WWLanguageAbstract:
 		return False
 		
 	def lastChar(self,cursor,n=1):
+		# Return the left char at the distance n from the cursor (n=1 means the one
+		# just on the left).
 		if cursor.atBlockStart():
 			return u'\n'		
 		else :
@@ -70,6 +79,8 @@ class WWLanguageAbstract:
 			return cur_tmp.selectedText ()
 
 	def nextChar(self,cursor,n=1):
+		# Return the right char at the distance n from the cursor (n=1 means the one
+		# just on the right).		
 		if cursor.atBlockEnd():
 			return u'\n'		
 		else :
@@ -82,8 +93,11 @@ class WWLanguageAbstract:
 			cur_tmp.movePosition (QtGui.QTextCursor.Right,QtGui.QTextCursor.KeepAnchor,n=n)
 			return cur_tmp.selectedText ()
 			
-	def getWordUnderCursor(self,cursor,char_expection=None):
-		if char_expection==None : char_expection=[]
+	def getWordUnderCursor(self,cursor,char_exception=None):
+		# Return the word under the cursor. char_exception in entry should be the list
+		# of the chars that should not be considered as word breack (usfull to take 
+		# words like "I'am" or "re-invented").
+		if char_exception==None : char_exception=[]
 		cur_start=QtGui.QTextCursor(cursor)
 		cur_start.clearSelection()
 		cur_end=QtGui.QTextCursor(cursor)
@@ -92,15 +106,11 @@ class WWLanguageAbstract:
 		regexp=QtCore.QRegExp("\\b")
 		
 		cur_start=cur_start.document().find(regexp,cur_start,QtGui.QTextDocument.FindBackward)
-		while self.lastChar( cur_start ) in char_expection:
-			print 'klm'
+		while self.lastChar( cur_start ) in char_exception:
 			cur_start.movePosition(QtGui.QTextCursor.Left,QtGui.QTextCursor.MoveAnchor)
 			cur_start=cur_start.document().find(regexp,cur_start,QtGui.QTextDocument.FindBackward)
 		cur_end=cur_end.document().find(regexp,cur_end)
-		# print "self.nextChar( cur_end )  :  ", unicode(self.nextChar( cur_end )).encode('ascii','replace')
-		# print "self.lastChar( cur_end )  :  ", unicode(self.lastChar( cur_end )).encode('ascii','replace')
-		while self.nextChar( cur_end ) in char_expection:
-			print 'jkl'
+		while self.nextChar( cur_end ) in char_exception:
 			cur_end.movePosition(QtGui.QTextCursor.Right,QtGui.QTextCursor.MoveAnchor,n=2)
 			cur_end=cur_end.document().find(regexp,cur_end)
 		
@@ -109,6 +119,7 @@ class WWLanguageAbstract:
 		return cur_start.selectedText(),cur_start
 		
 	def cheak(self,qdoc):
+		raise NotImplementedError( 'Old Function')
 		cursor=QTextCursor(qdoc)
 		res=False
 		res_tmp=self.correct_between_chars(cursor)
@@ -119,6 +130,9 @@ class WWLanguageAbstract:
 		return res	
 
 	def cheak_after_paste(self,cursor,nb_ite=-1):
+		# Method that will be called after a paste. It will correct the typography from
+		# the position of the cursor during nb_ite. If nb_ite is -1 then it will do the
+		# correction until the end of the document.
 		i=0
 		res=False
 		res_tmp=self.correct_between_chars(cursor)
@@ -130,11 +144,12 @@ class WWLanguageAbstract:
 		return res
 	
 	def afterWordWritten(self,cursor):
+		# Function which is called after a word has just been witten. It replaces some
+		# things that are specific to the language. It also correct the word if there
+		# has some auto-correction to make.
 		cur_tmp=QtGui.QTextCursor(cursor)
 		cur_tmp.clearSelection()
 		if cur_tmp.movePosition (QtGui.QTextCursor.Left,QtGui.QTextCursor.MoveAnchor,1):
-			# cur_tmp.select(QtGui.QTextCursor.WordUnderCursor)
-			# word=cur_tmp.selectedText ()
 			word,cur_tmp=self.getWordUnderCursor(cur_tmp)
 			replace=False
 			
@@ -154,6 +169,9 @@ class WWLanguageAbstract:
 				cur_tmp.insertText(word)
 
 	def wordCorrection(self):
+		# To reimplement if the language has some specific correction to make. For
+		# instance, in French, it is correct to make elisions of the two chars 'oe' 
+		# into a single char.
 		raise False
 		
 	

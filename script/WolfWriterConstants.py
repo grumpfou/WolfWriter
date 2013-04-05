@@ -1,4 +1,3 @@
-from WolfWriterError import WWError
 """
 Part of the WolfWriter project. Written by Renaud Dessalles
 Contains a implementation of the WWConstants. This class deals with all the contants that are
@@ -16,34 +15,35 @@ For instance :
 >>> CONSTANTS.overright(JUSTIFY=False,INDENT=40) # will change CONSTANTS.JUSTIFY to false
 			# and CONSTANTS.INDENT to 40
 """
+from WolfWriterError import WWError
 
 class WWConstants:
 	"""
-	JUSTIFY 				: if you want the text to be jsutify
-	SCENE_INDENT			: for the scene edit widget : to size of the indentation
-	TEXT_INDENT				: for the encyclopedia edit widget : to size of the indentation
-	SCENE_FONT_SIZE			: for the scene edit widget : to size of the font
-	TEXT_FONT_SIZE			: for the encyclopedia edit widget : to size of the font
-	FONT					: the name of the font in the edition widgets
-	LANGUAGE				: the language of the application (for now no effect)
-	DFT_WRITING_LANGUAGE	: by default when creating a new book, what language should we choose
-	DO_AUTO_CORRECTION		: if the software replace the word described in AUTO_CORRECTION
-	DO_TYPOGRAPHY			: if the software take care of the typography
-	AUTO_CORRECTION			: the list of the word and the word to replace
-	WITH_HIGHLIGHTER		: tels if the hilighter should be active
-	NAMEGEN_RANGE_LEN		: for the name generator : the range of the length
-	NAMEGEN_DFT_LEN			: for the name generator : the default length of the name to be created
-	NAMEGEN_RANGE_NUMBER	: for the name generator : the range of the number of names to be created
-	NAMEGEN_DFT_NUMBER		: for the name generator : the range of the number of names to be created
-	SEARCH_CONTXT_DIST		: for the search pannel : the size of the context in with is presented the result
-	MAX_ZFILL				: for the temporary file, the numbers of zeros into the files (limit the number of scenes)
-	EXTERNAL_SOFT_PATH		: the full path to an external software with which we edit the scene
-	LINE_HEIGHT				: the inter-line in the edit widgets
-	TIME_STATUS_MESSAGE		: the time it leaves a message into the status bar (put 0 if it is indefinitly)
-	RECHECK_TEXT_OPEN		: tels if we have to reacheck the typography of a text when reopening it
-	DELETE_TEMP_FILES		: tels if it deletes the temporary files, the ones that are created when dezipping the files
-	ENCY_TAB_APPLY			: tels if we apply the modifications made to a page of the encyclopedia when moving
-	DLT_OPEN_SAVE_SITE		: the path to the directory where we have to open the file ("~" if you want home)		
+	- JUSTIFY 				: if you want the text to be jsutify
+	- SCENE_INDENT			: for the scene edit widget : to size of the indentation
+	- TEXT_INDENT				: for the encyclopedia edit widget : to size of the indentation
+	- SCENE_FONT_SIZE			: for the scene edit widget : to size of the font
+	- TEXT_FONT_SIZE			: for the encyclopedia edit widget : to size of the font
+	- FONT					: the name of the font in the edition widgets
+	- LANGUAGE				: the language of the application (for now no effect)
+	- DFT_WRITING_LANGUAGE	: by default when creating a new book, what language should we choose
+	- DO_AUTO_CORRECTION		: if the software replace the word described in AUTO_CORRECTION
+	- DO_TYPOGRAPHY			: if the software take care of the typography
+	- AUTO_CORRECTION			: the list of the word and the word to replace
+	- WITH_HIGHLIGHTER		: tels if the hilighter should be active
+	- NAMEGEN_RANGE_LEN		: for the name generator : the range of the length
+	- NAMEGEN_DFT_LEN			: for the name generator : the default length of the name to be created
+	- NAMEGEN_RANGE_NUMBER	: for the name generator : the range of the number of names to be created
+	- NAMEGEN_DFT_NUMBER		: for the name generator : the range of the number of names to be created
+	- SEARCH_CONTXT_DIST		: for the search pannel : the size of the context in with is presented the result
+	- MAX_ZFILL				: for the temporary file, the numbers of zeros into the files (limit the number of scenes)
+	- EXTERNAL_SOFT_PATH		: the full path to an external software with which we edit the scene
+	- LINE_HEIGHT				: the inter-line in the edit widgets
+	- TIME_STATUS_MESSAGE		: the time it leaves a message into the status bar (put 0 if it is indefinitly)
+	- RECHECK_TEXT_OPEN		: tels if we have to reacheck the typography of a text when reopening it
+	- DELETE_TEMP_FILES		: tels if it deletes the temporary files, the ones that are created when dezipping the files
+	- ENCY_TAB_APPLY			: tels if we apply the modifications made to a page of the encyclopedia when moving
+	- DLT_OPEN_SAVE_SITE		: the path to the directory where we have to open the file ("~" if you want home)		
 	"""
 	def __init__(self,**kargs):
 		# The syntax is as follow
