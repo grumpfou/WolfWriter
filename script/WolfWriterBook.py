@@ -20,6 +20,7 @@ import os.path
 import random
 import zipfile
 import codecs
+import shutil
 
 from WolfWriterCommon 		import *
 from WolfWriterScene 		import *
@@ -86,7 +87,8 @@ class WWBook:
 						fp.close()
 						
 				else:
-					self.list_archives=list(set(self.list_archives).union(dir_arch))
+					
+					self.list_archives=list(set(self.list_archives).union([dir_arch]))
 					self.list_dirs=list(set(self.list_dirs).union([TMP_FILE_MARK+dir_arch]))
 					dd=os.path.join(d,TMP_FILE_MARK+dir_arch)
 					if not os.path.exists(dd):
@@ -160,13 +162,21 @@ class WWBook:
 		# scenes and saving them in the zipfile at the path filepath (if None, then choosing
 		# self.zippath).
 		if filepath!=None:
-			dirname=None
+			# If we are saving somewhere else
+			dirname,f=os.path.split(filepath)
+			passNotChanged=False
 		else:
+			#If we are saving in situs
 			dirname,f=os.path.split(self.zippath)
-			
-		self.structure.save_xml(dirname=dirname)
-		self.structure.save_associate_files(dirname=dirname)
-		self.encyclopedia.save_xml(dirname=dirname)
+			passNotChanged=False #TODO : change it to be true
+		
+		self.structure.save_xml(dirname=dirname,passNotChanged=passNotChanged)
+		self.structure.save_associate_files(dirname=dirname,passNotChanged=passNotChanged)
+		self.encyclopedia.save_xml(dirname=dirname,passNotChanged=passNotChanged)
+		
+		old_dirname,f=os.path.split(self.zippath)
+		if os.path.abspath(dirname)!=os.path.abspath(old_dirname): 
+			self.resave_all_archives(new_dirpath=dirname)
 		self.upload_revision()
 		self.rezip(filepath)
 		
@@ -269,7 +279,23 @@ class WWBook:
 		self.list_files=list(set(self.list_files+new_list_names))
 		self.list_archives.append(name)
 		self.list_dirs.append(TMP_FILE_MARK+name)
-		
+	
+	def resave_all_archives(self,new_dirpath):
+		"""
+		Will save all the archive temporary directories in another new_dirpath.
+		- new_dirpath : the new place where to save the archives dir (should be 
+				different from the old one.)
+		"""
+		old_dirpath,f=os.path.split(self.zippath)
+		assert os.path.abspath(new_dirpath)!=os.path.abspath(old_dirpath)
+		for arch_name in self.list_archives:
+			if not os.path.exists(os.path.join(new_dirpath,TMP_FILE_MARK+arch_name)):
+				os.mkdir(os.path.join(new_dirpath,TMP_FILE_MARK+arch_name))
+			
+			for file in os.listdir(os.path.join(old_dirpath,TMP_FILE_MARK+arch_name)):
+				filepath=os.path.join(old_dirpath,TMP_FILE_MARK+arch_name,file)
+				shutil.copy(filepath,os.path.join(new_dirpath,TMP_FILE_MARK+arch_name))
+			
 		
 class WWStructure (WWNodeFirstAbstract):
 	xml_name="structure"
@@ -354,14 +380,14 @@ class WWStructure (WWNodeFirstAbstract):
 		
 		return to_add
 		
-	def save_associate_files(self,dirname=None):
+	def save_associate_files(self,dirname=None,*args,**kargs):
 		# When saving the book, we have to save other xml files such as the scene files. 
 		if dirname==None:
 			dirname=self.dirname
 		else :
 			self.dirname=dirname
 		for ch in self.story.list_chapters:
-			ch.saveScenes(dirname=dirname)
+			ch.saveScenes(dirname=dirname,*args,**kargs)
 		# TODO for the encyclopedia	# TODO
 
 	def find(self,patern,**kargs):
@@ -605,16 +631,16 @@ class WWChapter (WWNodeAbstract):
 			numberWords+=sc.stats["numberWords"]
 		self.stats={"numberChars":numberChars,"numberWords":numberWords}
 			
-	def saveScenes(self,dirname):
+	def saveScenes(self,dirname,*args,**kargs):
 		# Save all the scenes xml files in all the given directory
 		for i in range(len(self.children_names)):
-			self.saveScene(place=i,dirname=dirname)
+			self.saveScene(place=i,dirname=dirname,*args,**kargs)
 			
-	def saveScene(self,place,dirname=None):
+	def saveScene(self,place,dirname=None,*args,**kargs):
 		# Save the given scene xml file in all the given directory
 		assert 0<=place<len(self.children)
 		if dirname==None : dirpath=self.getFirstNode().dirname
-		self.children[place].save_xml(dirname=dirname,filename=TMP_FILE_MARK+self.children_names[place])
+		self.children[place].save_xml(dirname=dirname,filename=TMP_FILE_MARK+self.children_names[place],*args,**kargs)
 	
 	def getInfo(self,info):
 		# Gives the information that is ask by "info" in entry

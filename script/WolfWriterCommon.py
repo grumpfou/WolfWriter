@@ -204,3 +204,11 @@ def yieldBlockInSelection_WW(self):
 		bl=bl.next()
 		yield bl
 QtGui.QTextCursor.yieldBlockInSelection=yieldBlockInSelection_WW
+
+#### debug ####
+def DEBUG_showInfo(title=None,msg=None):
+	if title==None: title=u""	
+	if msg==None: msg=u""
+	# app = QtGui.QApplication(sys.argv)
+	msgBox=QtGui.QMessageBox.information(None, title, msg)
+	

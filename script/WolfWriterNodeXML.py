@@ -9,6 +9,7 @@ import xml.dom.minidom as XML
 import xml.parsers.expat as XML_Error
 
 from WolfWriterError import *
+from WolfWriterCommon import *
 
 class WWErrorXML (Exception):
     def __init__(self,raison):
@@ -237,18 +238,26 @@ class WWNodeFirstAbstract (WWNodeAbstract):
 		"""
 		return self
 	
-	def save_xml(self,dirname=None,filename=None,passNotChanged=True,prename=None):
+	def save_xml(self,dirname=None,filename=None,passNotChanged=False,prename=None):
 		"""
 		Will save as an xml file all the structure in a file :
 		- dirname : where to save the file (if None we take the one when initiating 
 				the instance.
 		- filename : the name of the file (if None we take the one when initiating the 
 				instance.
-		- passNotChanged : if True then it will the saving if nothing have changed.
+		- passNotChanged : if True then it will not save if nothing have changed.
 		- prename : to add to before the the filename (a temporary file mark for 
 				instance.)		
 		"""
-		if ( passNotChanged) or (self.hasChanged):
+		
+		# msg="self.xml_name  :  "		+unicode(	self.xml_name	)+'\n'+\
+		# "	dirname  :  "			+unicode(	dirname         )+'\n'+\
+		# "	filename  :  "			+unicode(	filename        )+'\n'+\
+		# "	passNotChanged  :  "	+unicode(	passNotChanged  )+'\n'+\
+		# "	prename  :  "			+unicode(	prename         )+'\n'
+		# DEBUG_showInfo(None,msg)
+			
+		if (not passNotChanged) or (self.hasChanged):                  
 			if dirname!=None:
 				self.dirname=dirname
 			if filename!=None:
