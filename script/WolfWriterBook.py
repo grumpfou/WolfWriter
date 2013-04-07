@@ -174,7 +174,9 @@ class WWBook:
 		self.structure.save_associate_files(dirname=dirname,passNotChanged=passNotChanged)
 		self.encyclopedia.save_xml(dirname=dirname,passNotChanged=passNotChanged)
 		
-		old_dirname,f=os.path.split(self.zippath)
+		if self.zippath!=None:
+			old_dirname,f=os.path.split(self.zippath)
+		else : old_dirname=None
 		if os.path.abspath(dirname)!=os.path.abspath(old_dirname): 
 			self.resave_all_archives(new_dirpath=dirname)
 		self.upload_revision()
@@ -286,7 +288,9 @@ class WWBook:
 		- new_dirpath : the new place where to save the archives dir (should be 
 				different from the old one.)
 		"""
-		old_dirpath,f=os.path.split(self.zippath)
+		if self.zippath!=None:
+			old_dirpath,f=os.path.split(self.zippath)
+		else : old_dirpath=None
 		assert os.path.abspath(new_dirpath)!=os.path.abspath(old_dirpath)
 		for arch_name in self.list_archives:
 			if not os.path.exists(os.path.join(new_dirpath,TMP_FILE_MARK+arch_name)):
@@ -410,7 +414,8 @@ class WWStructure (WWNodeFirstAbstract):
 		filepath=os.path.join(self.getFirstNode().dirname,TMP_FILE_MARK+newname)
 		self.getFirstNode().book.list_files+=[TMP_FILE_MARK+newname]
 		newScene=WWScene(pathway=filepath,new=True,parent=None,parent_file=self.getFirstNode(),title=title)
-		
+		self.list_associate_files.append(newname)
+		print "self.list_associate_files  :  ",self.list_associate_files
 		return newScene
 
 			

@@ -95,9 +95,17 @@ class WWConstants:
 
 			else:
 				try :
-					self.__dict__[key]=self.all_constants[key][0](kargs[key])
+					#If it is a boolean, we do the conversion ourselves
+					if self.all_constants[key][0]==bool:
+						if kargs[key]=="True" or kargs[key]=="true": self.__dict__[key]=True
+						elif kargs[key]=="False" or kargs[key]=="false": self.__dict__[key]=False
+						else :
+							raise ValueError()
+					#Otherwise, we automatically make the conversion
+					else:	
+						self.__dict__[key]=self.all_constants[key][0](kargs[key])
 				except ValueError:
-					raise WWError("The arguments contained in "+str(kargs[key])+" should be convertible in "+str(self.all_constants[key][0]))				
+					raise WWError("The arguments contained in "+str(kargs[key])+" should be convertible in "+str(self.all_constants[key][0]))	
 	
 	def __str__(self,only_different_from_default=False):
 		res=""

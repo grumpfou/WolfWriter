@@ -4,6 +4,7 @@ AUTO_CORRECTION : jms jamais | tjs toujours | svt souvent | ê être | gvt gouve
 EXTERNAL_SOFT_PATH : "C:\Program Files (x86)\Druide\Antidote 7\Programmes32\antido32.exe"
 
 LINE_HEIGHT : 150
+WITH_HIGHLIGHTER : True
 
 DLT_OPEN_SAVE_SITE : ~\Documents\
 

@@ -145,33 +145,15 @@ class WWMainWindow(QtGui.QMainWindow):
 			# widget.setSizePolicy(policy)
 		def setup_centerLayout(widget):
 			self.centerLayout=QtGui.QVBoxLayout(widget)
-			# self.lineEditChapter=QtGui.QLineEdit(self)
-			# head_widget=QtGui.QWidget()
-			# layout_head=QtGui.QHBoxLayout()
-			# self.lineEditScene=QtGui.QLineEdit(self)
-			# self.buttonSetSelectedScene=QtGui.QPushButton("	")
-			# self.buttonSetSelectedScene.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"2leftarrow.png")))
-			# layout_head.addWidget(self.buttonSetSelectedScene)
-			# layout_head.addWidget(self.lineEditScene)
-			# head_widget.setLayout(layout_head)
 			top_widget=QtGui.QWidget()
 			layout_top=QtGui.QVBoxLayout()
 			
-			# top_left_widget=QtGui.QWidget()
-			# layout_top_left=QtGui.QVBoxLayout()
 			self.labelChapter = QtGui.QLabel()
 			self.labelScene  = QtGui.QLabel()
 			layout_top.addWidget( self.labelChapter )
 			layout_top.addWidget( self.labelScene   )
-			# layout_top_left.addWidget( self.labelChapter )
-			# layout_top_left.addWidget( self.labelScene   )
-			# top_left_widget.setLayout(layout_top_left)
 						
 			self.sceneEdit=WWSceneEdit(parent=self,main_window=self)
-			# toolBar=self.sceneEdit.getToolBar(self)
-			
-			# layout_top.addWidget(top_left_widget)
-			# layout_top.addWidget(toolBar)
 			top_widget.setLayout(layout_top)
 			
 			bottom_widget=QtGui.QWidget()
@@ -185,16 +167,13 @@ class WWMainWindow(QtGui.QMainWindow):
 			layout_bottom.addWidget(self.buttonNextScene)
 			bottom_widget.setLayout(layout_bottom)
 			
-			# self.rightLayout.addWidget( self.lineEditChapter )
 			
 			
 			self.centerLayout.addWidget( top_widget )
 			self.centerLayout.addWidget( self.sceneEdit )
 			self.centerLayout.addWidget( bottom_widget )
 			widget.setLayout ( self.centerLayout )
-			# policy=QtGui.QSizePolicy (  )
-			# policy.setHorizontalPolicy(QtGui.QSizePolicy.Maximum)
-			# widget.setSizePolicy(policy)
+
 		def setup_rightLayout(widget):
 			self.ency_panel=WWEncyPanel(encyclopedia=self.book.encyclopedia,main_window=self)
 			self.search_panel=WWSearchPanel(self.book,main_window=self)
@@ -375,11 +354,11 @@ class WWMainWindow(QtGui.QMainWindow):
 			filepath=unicode(filepath)
 			old_zipvepath=self.book.zippath
 			self.book.save_book(filepath=filepath)
+			
 			self.book.zippath=filepath
 			
-			dirname,f=os.path.split(old_zipvepath)
-			
-			if CONSTANTS.DELETE_TEMP_FILES and self.book.zippath!=None: #if we have to delete the temporary files and if the book is not a new one
+			if CONSTANTS.DELETE_TEMP_FILES and old_zipvepath!=None: #if we have to delete the temporary files and if the book is not a new one
+				dirname,f=os.path.split(old_zipvepath)
 				self.book.del_files(dirname)
 			self.changeMessageStatusBar("Book : Has saved "+filepath)
 	
@@ -596,8 +575,20 @@ class WWMainWindow(QtGui.QMainWindow):
 		else :
 			res,tmp=os.path.split(self.book.zippath)
 			return res
+
+
+
+
 if __name__ == '__main__':
 	app = QtGui.QApplication(sys.argv)
+	
+	mainWindow=None
+	def my_excepthook(type, value, tback):
+		res=type.__name__+":"+unicode(value)
+		
+		msgBox=QtGui.QMessageBox.critical(mainWindow, type.__name__, res)
+		sys.__excepthook__(type, value, tback) 
+	sys.excepthook = my_excepthook
 	if len(sys.argv)>1:
 		bk=WWBook(zippath=sys.argv[1])
 	else:
@@ -605,8 +596,7 @@ if __name__ == '__main__':
 		bk.zippath=None
 		
 		
-	
 	mainWindow = WWMainWindow(bk)
 	mainWindow.show()
-
 	sys.exit(app.exec_())
+	

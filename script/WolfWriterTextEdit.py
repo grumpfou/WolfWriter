@@ -52,42 +52,15 @@ class WWTextEdit(QtGui.QTextEdit):
 		
 		self.old_cursor_position=self.textCursor().position() #we will remember the old position of the cursor in order to make typography corrections when it will move
 		
-		
-		# fill self.language according to the language of the book
-		if self.book==None:
-			self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
-		else :
-			if not WWLanguageDico.has_key(self.book.structure.language):
-				self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
-				raise WWError("Do not have the typography for the language "+self.book.structure.language)
-			else:
-				self.language=WWLanguageDico[self.book.structure.language]()
-		
+		if book!=None:
+			self.changeLanguage(book.structure.language)
+		else : self.changeLanguage(None)
 		# create the highlighter if necessary
+		print "CONSTANTS.WITH_HIGHLIGHTER  :  ",CONSTANTS.WITH_HIGHLIGHTER
 		if CONSTANTS.WITH_HIGHLIGHTER:
 			self.highlighter=WWHighlighter(self.document(),book=book)
 		
-		# add the language insert shortcuts to the class 
-		dico=self.language.shortcuts_insert
-		mapper = QtCore.QSignalMapper(self)
-		for k in dico.keys():
-			short=QtGui.QShortcut(QtGui.QKeySequence(*k),self)
-			QtCore.QObject.connect(short,QtCore.SIGNAL("activated ()"), mapper, QtCore.SLOT("map()"))
-			short.setContext(QtCore.Qt.WidgetShortcut)
-			mapper.setMapping(short, dico[k])
-		self.connect(mapper, QtCore.SIGNAL("mapped(const QString &)"), self.insertPlainText )
-		
-		# add the language pluggins to the class 
-		dico=self.language.shortcuts_correction_plugins
-		self.dico_pluggins={}
-		mapper = QtCore.QSignalMapper(self)
-		for i,k in enumerate(dico.keys()):
-			short=QtGui.QShortcut(QtGui.QKeySequence(*k),self)
-			QtCore.QObject.connect(short,QtCore.SIGNAL("activated ()"), mapper, QtCore.SLOT("map()"))
-			short.setContext(QtCore.Qt.WidgetShortcut)
-			
-			self.dico_pluggins[i]=dico[k]
-			mapper.setMapping(short, i)
+
 		
 		
 		# Creating the action actionLaunchCharWidgetTable (it will display the char
@@ -95,7 +68,7 @@ class WWTextEdit(QtGui.QTextEdit):
 		self.actionLaunchCharWidgetTable=QtGui.QAction("&Special Characters",self)
 		self.actionLaunchCharWidgetTable.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"character-set.png")))
 		self.connect(self.actionLaunchCharWidgetTable, QtCore.SIGNAL("triggered()"), self.SLOT_launchCharWidgetTable)
-		self.connect(mapper, QtCore.SIGNAL("mapped(int)"), self.SLOT_pluggins )
+		
 		
 		
 		
@@ -107,13 +80,9 @@ class WWTextEdit(QtGui.QTextEdit):
 		if book==None: book=self.book
 		if text==None: text=""
 		# We change the language if necessary
-		if self.book!=None:
-			if self.language.name!=self.book.structure.language:
-				if not WWLanguageDico.has_key(self.book.structure.language):
-					self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
-					raise WWError("Do not have the typography for the language "+self.book.structure.language)
-				else:
-					self.language=WWLanguageDico[self.book.structure.language]()
+		if book!=None :
+			if self.language.name!=book.structure.language:
+				self.changeLanguage(book.structure.language)
 		
 		# Creating the new document and inserting the text in it
 		document=QtGui.QTextDocument(self)
@@ -127,10 +96,21 @@ class WWTextEdit(QtGui.QTextEdit):
 		
 		# Adding the document to as document of the WWTextEdit
 		self.blockSignals (True)
-		self.setDocument(document)
-		self.blockSignals (False)
 		if CONSTANTS.WITH_HIGHLIGHTER:
-			self.highlighter=WWHighlighter(self.document(),book=book)
+			newHighlight=WWHighlighter(document,book=book)
+		self.setDocument(document)
+		
+		if CONSTANTS.WITH_HIGHLIGHTER:
+			self.highlighter=newHighlight
+		# if CONSTANTS.WITH_HIGHLIGHTER:
+			# self.highlighter.book=book
+			# self.highlighter.reload_word_set()
+			# self.highlighter.setDocument(self.document())
+		# if CONSTANTS.WITH_HIGHLIGHTER:
+			# self.highlighter.rehighlight()
+		
+		
+		self.blockSignals (False)
 		self.setTextCursor(cursor)	
 
 		self.book=book
@@ -286,19 +266,56 @@ class WWTextEdit(QtGui.QTextEdit):
 			self.language.cheak_after_paste(cursor,text.size()) 
 		self.blockSignals (False)
 	
-	def  resizeEvent (self,event):
-		"""A re-implementation of insertFromMimeData. We have to re-run the highlighter.
-		"""
-		QtGui.QTextEdit.resizeEvent(self,event)
-		self.blockSignals (True)
-		if CONSTANTS.WITH_HIGHLIGHTER:
-			self.highlighter.rehighlight()
-		self.blockSignals (False)
+	# def  resizeEvent (self,event):
+		# """A re-implementation of insertFromMimeData. We have to re-run the highlighter.
+		# """
+		# QtGui.QTextEdit.resizeEvent(self,event)
+		# self.blockSignals (True)
+		# if CONSTANTS.WITH_HIGHLIGHTER:
+			# self.highlighter.rehighlight()
+		# self.blockSignals (False)
 		
 	
 	def afterCorrection(self,rule,pos):
 		"""?????????????"""
 		pass
+		
+	def changeLanguage(self,language_name=None):
+		
+		
+		# fill self.language according to the language of the book
+		if language_name==None:
+			self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
+		else :
+			if not WWLanguageDico.has_key(language_name):
+				self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
+				raise WWError("Do not have the typography for the language "+self.book.structure.language)
+			else:
+				self.language=WWLanguageDico[language_name]()		
+				
+				
+		# add the language insert shortcuts to the class 
+		dico=self.language.shortcuts_insert
+		mapper = QtCore.QSignalMapper(self)
+		for k in dico.keys():
+			short=QtGui.QShortcut(QtGui.QKeySequence(*k),self)
+			QtCore.QObject.connect(short,QtCore.SIGNAL("activated ()"), mapper, QtCore.SLOT("map()"))
+			short.setContext(QtCore.Qt.WidgetShortcut)
+			mapper.setMapping(short, dico[k])
+		self.connect(mapper, QtCore.SIGNAL("mapped(const QString &)"), self.insertPlainText )
+		
+		# add the language pluggins to the class 
+		dico=self.language.shortcuts_correction_plugins
+		self.dico_pluggins={}
+		mapper = QtCore.QSignalMapper(self)
+		for i,k in enumerate(dico.keys()):
+			short=QtGui.QShortcut(QtGui.QKeySequence(*k),self)
+			QtCore.QObject.connect(short,QtCore.SIGNAL("activated ()"), mapper, QtCore.SLOT("map()"))
+			short.setContext(QtCore.Qt.WidgetShortcut)
+			
+			self.dico_pluggins[i]=dico[k]
+			mapper.setMapping(short, i)		
+		self.connect(mapper, QtCore.SIGNAL("mapped(int)"), self.SLOT_pluggins )
 		
 class WWSceneEdit(WWTextEdit):
 	def __init__(self,parent,scene=None,book=None,main_window=None):
@@ -317,17 +334,15 @@ class WWSceneEdit(WWTextEdit):
 		""" Reimplementation of setText to put the format of the Scene edit 
 		(with justification, font size, font etc.)
 		"""
+		
+		
 		if book==None: book=self.book
 		if text==None: text=""
 			
-		# Changing the language to the one of the book
-		if self.book!=None:
-			if self.language.name!=self.book.structure.language:
-				if not WWLanguageDico.has_key(self.book.structure.language):
-					self.language=WWLanguageDico[CONSTANTS.DFT_WRITING_LANGUAGE]()
-					raise WWError("Do not have the typography for the language "+self.book.structure.language)
-				else:
-					self.language=WWLanguageDico[self.book.structure.language]()
+		# Changing the language to the one of the book :
+		if book!=None :
+			if self.language.name!=book.structure.language:
+				self.changeLanguage(book.structure.language)
 		
 		# Creating the new QTextDocument
 		document=QtGui.QTextDocument(self)
@@ -354,12 +369,14 @@ class WWSceneEdit(WWTextEdit):
 		
 		# Put the document as the document of the class
 		self.blockSignals (True)
+		if CONSTANTS.WITH_HIGHLIGHTER:
+			newHighlight=WWHighlighter(document,book=book)
 		self.setDocument(document)
+		
+		if CONSTANTS.WITH_HIGHLIGHTER:
+			self.highlighter=newHighlight
 		self.blockSignals (False)
 		
-		# Create the Highlighter if necessary
-		if CONSTANTS.WITH_HIGHLIGHTER:
-			self.highlighter=WWHighlighter(self.document(),book=book)
 		self.setTextCursor(cursor)	
 
 		self.book=book	
@@ -386,6 +403,7 @@ class WWSceneEdit(WWTextEdit):
 		
 		# Inserting the text of the new scene
 		if self.scene!=None:
+			
 			self.setText(self.scene.text,book=book)
 		else:
 			self.setText(book=book)
@@ -426,19 +444,28 @@ if __name__ == '__main__':
 	from WolfWriterBook import *
 	from WolfWriterCharTable import *
 	pp="C:\\Users\\Renaud\\Documents\\Programmation\\Python\\WolfWriter_Test\\TestPerso\\testa.zip"
+	pp="C:\\Users\\Renaud\\Documents\\Programmation\\Python\\WolfWriter_Test\\BigBug\\book1.ww"
+	
+	
 	
 	
 	bk=WWBook(zippath=pp)
 	
 	app = QtGui.QApplication(sys.argv)
 	
-	textedit = WWSceneEdit(parent=None,scene=bk.structure.story.list_chapters[0].children[0],book=bk)
+	secenedit = WWSceneEdit(parent=None,scene=bk.structure.story.list_chapters[0].children[0],book=bk)
+	textedit = WWTextEdit(parent=None,book=bk)
+	textedit.setText(bk.structure.story.list_chapters[0].children[0].text)
+	simpletextedit = QtGui.QTextEdit(parent=None)
+	simpletextedit.setText(bk.structure.story.list_chapters[0].children[0].text)
 	button= QtGui.QPushButton('ATGC')
 	# button.setAction(textedit.action)
 	
 	# text_edit1=QtGui.QTextEdit()
 	layout=QtGui.QHBoxLayout()
+	layout.addWidget(secenedit)
 	layout.addWidget(textedit)
+	layout.addWidget(simpletextedit)
 	layout.addWidget(button)
 	def toto():
 		# dialog=QtGui.QDialog(parent=textedit)
