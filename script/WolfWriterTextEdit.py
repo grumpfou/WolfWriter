@@ -467,6 +467,7 @@ if __name__ == '__main__':
 	layout.addWidget(textedit)
 	layout.addWidget(simpletextedit)
 	layout.addWidget(button)
+
 	def toto():
 		# dialog=QtGui.QDialog(parent=textedit)
 		# layout=QtGui.QVBoxLayout()

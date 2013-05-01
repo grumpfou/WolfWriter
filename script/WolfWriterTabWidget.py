@@ -409,8 +409,53 @@ class WWEncyPanel (QtGui.QWidget):
 		"""Slot that emit the message "changed ()" It is caught by the main window."""
 		self.emit(QtCore.SIGNAL("changed ()"))
 		
+	
 	################################################
+class WWWordsCountPanel( QtGui.QWidget):
+	def __init__(self,book,main_window=None,*args,**kargs):
+		"""
+		Pannel that allow to see how much words have been written in the session.
+		"""
+		self.name=u"Written Word count"
+		QtGui.QWidget.__init__(self,*args,**kargs)
+		self.book=book
+		self.main_window=main_window
+		
+		self.lcd_number = QtGui.QLCDNumber ()
+		refresh_button 	= QtGui.QPushButton("&Refresh")
+		restart_button 	= QtGui.QPushButton("&Restart")
+		main_layout		= QtGui.QGridLayout ()
 
+			
+		main_layout.addWidget(self.lcd_number	, 0, 0, 1, 2)
+		main_layout.addWidget(refresh_button	, 1, 0)
+		main_layout.addWidget(restart_button	, 1, 1)
+		
+		self. setLayout ( main_layout )
+	
+		self.base_number	=	self.book.structure.story.getInfo("numberWords")
+		# Connections:
+		self.connect(refresh_button, QtCore.SIGNAL("clicked()"), self.SLOT_refresh)
+		self.connect(restart_button, QtCore.SIGNAL("clicked()"), self.SLOT_restart)
+
+	#################### SLOTS #####################
+	def SLOT_refresh(self):
+		if self.main_window!=None:
+			self.main_window.sceneEdit.uploadScene()
+		new_number = self.book.structure.story.getInfo("numberWords")
+		self.lcd_number.display(new_number-self.base_number)
+		
+	def SLOT_restart(self):
+		self.base_number = self.book.structure.story.getInfo("numberWords")
+		self.lcd_number.display(0)
+		
+		
+		
+	
+	################################################
+	
+		
+		
 if __name__ == '__main__':
 	app = QtGui.QApplication(sys.argv)
 	pp="C:\\Users\\Renaud\\Documents\\Programmation\\Python\\WolfWriter_Test\\TestPerso\\testa.zip"

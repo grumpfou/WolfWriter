@@ -178,10 +178,12 @@ class WWMainWindow(QtGui.QMainWindow):
 			self.ency_panel=WWEncyPanel(encyclopedia=self.book.encyclopedia,main_window=self)
 			self.search_panel=WWSearchPanel(self.book,main_window=self)
 			self.name_generator_panel=WWNameGeneratorPannel(main_window=self)
+			self.words_count_panel=WWWordsCountPanel(self.book,main_window=self)
 			self.tab_widget=WWTabWidget(list_panels=[
 								self.ency_panel,
 								self.search_panel,
 								self.name_generator_panel,
+								self.words_count_panel,
 								]) #TODO when recharged book
 			self.rightLayout=QtGui.QVBoxLayout(widget)
 			self.rightLayout.addWidget( self.tab_widget )
@@ -325,15 +327,15 @@ class WWMainWindow(QtGui.QMainWindow):
 		return True
 	
 	
-	def SLOT_actionOpenBook(self): 
+	def SLOT_actionOpenBook(self,filename=None): 
 		if self.actionSaveBook.isEnabled ():
 			res=self.doSaveDialog()
 			if (res != QtGui.QMessageBox.Yes) and (res != QtGui.QMessageBox.No):
 				return False
 		
-		dialog= QtGui.QFileDialog(self)
-		
-		filename = dialog.	getOpenFileName(self,"Select a ww file",self.get_default_opening_saving_site())
+		if filename==None:
+			dialog= QtGui.QFileDialog(self)
+			filename = dialog.	getOpenFileName(self,"Select a ww file",self.get_default_opening_saving_site())
 		if filename:
 			if CONSTANTS.DELETE_TEMP_FILES and self.book.zippath!=None: #if we have to delete the temporary files and if the book is not a new one
 				self.book.del_files()
@@ -576,6 +578,19 @@ class WWMainWindow(QtGui.QMainWindow):
 			res,tmp=os.path.split(self.book.zippath)
 			return res
 
+	def read_cmd(self,line):
+		line=unicode(line).split()
+		if line[0]=='open':
+			filename=' '.join(line[1:])
+			self.SLOT_actionOpenBook(filename)
+		elif line[0]=='new':
+			self.SLOT_actionNewBook()
+		else: WWError('Command unknown : '+line[0])
+		
+		self.show()
+		self.raise_()
+		self.activateWindow()
+			
 
 
 

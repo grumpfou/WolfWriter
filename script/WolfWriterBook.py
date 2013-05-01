@@ -518,9 +518,9 @@ class WWStory (WWNodeAbstract):
 		# Return the the "info" string in entry into a title style.
 		# Note: this function should be move to WWStructure when re-implementing the 
 		# first story node in WWTreeView. TODO
+		if info=='numberWords':
+			return self.stats["numberWords"]
 		return WWWordTools.toID(info,WWWordTools.IND_FIRST_CAP)
-		# if info=='numberWords':
-			# return self.stats["numberWords"]
 		# else:
 			# return WWNodeAbstract.getInfo(self,info)
 	
