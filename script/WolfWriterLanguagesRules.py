@@ -294,17 +294,18 @@ class WWRuleFrench0005 (WWRuleAbstract):
 		return False
 
 class WWRuleFrench0006 (WWRuleAbstract):
-	title="No unbreakable space if it is not before a ponctuation or after an oppening guillemet"
+	title="No unbreakable space if it is not before a ponctuation or after an oppening guillemet or after a dialog dash."
 	description=	\
-		"Usually we prevent using an unbreakable space (US) if it is not before a ponctuation like ';', ':', '!', '?', or a closing guillemet. It can also be used after an opening guillemet. It replaces the unbreakable space by a simple space.\n\
+		"Usually we prevent using an unbreakable space (US) if it is not before a ponctuation like ';', ':', '!', '?', or a closing guillemet or a dialog dash. It can also be used after an opening guillemet. It replaces the unbreakable space by a simple space.\n\
 		example :	'Je[US]suis' -> 'Je suis'\n\
 					'[OG][US]\\Bonjour' -> same\n\
-					'Bonjour[US]!' -> same"
+					'Bonjour[US]!' -> same\n\
+					'[DD][US]Salut -> same"
 	in_languges=[u'French']
 	def correct(self,last_char,next_char,cursor):
 		if last_char==u'\u00A0' and (next_char not in [u';',u':',u'!',u'?',u'\u00BB']): 
 			last_last_char=self.language.lastChar(cursor,n=2)
-			if last_last_char!=u'\u00AB': # we cheak it caused by an oppening "guillemet"
+			if last_last_char not in [u'\u00AB' , u'\u2014']: # we cheak it caused by an oppening "guillemet"
 				cursor.deletePreviousChar()
 				cursor.insertText(u' ')
 				return True

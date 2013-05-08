@@ -53,14 +53,14 @@ class WWLanguageAbstract:
 		#Function that will be called everytime the cursor moves. It check the respect
 		#of all the typography rules of the two char of both sides of the position that
 		#the cursor has just left.
+
 		last_char=self.lastChar(cursor)
 		next_char=self.nextChar(cursor)
+		
 		for rule in self.rules:
 			res=rule.correct(last_char,next_char,cursor)
 			if res :
-				print "res  :  ",res
 				return (rule,cursor.position())
-		
 		return False
 		
 	def lastChar(self,cursor,n=1):

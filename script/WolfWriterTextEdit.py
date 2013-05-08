@@ -31,6 +31,9 @@ from WolfWriterCharTable 		import *
 from WolfWriterError 			import *
 
 
+	
+
+
 class WWTextEdit(QtGui.QTextEdit):
 	def __init__(self, parent=None,book=None,main_window=None):
 		"""
@@ -60,8 +63,6 @@ class WWTextEdit(QtGui.QTextEdit):
 		if CONSTANTS.WITH_HIGHLIGHTER:
 			self.highlighter=WWHighlighter(self.document(),book=book)
 		
-
-		
 		
 		# Creating the action actionLaunchCharWidgetTable (it will display the char
 		# table).
@@ -69,6 +70,8 @@ class WWTextEdit(QtGui.QTextEdit):
 		self.actionLaunchCharWidgetTable.setIcon(QtGui.QIcon(os.path.join(abs_path_icon,"character-set.png")))
 		self.connect(self.actionLaunchCharWidgetTable, QtCore.SIGNAL("triggered()"), self.SLOT_launchCharWidgetTable)
 		
+		shortcut = QtGui.QShortcut(QtGui.QKeySequence("Ctrl+Z"), self)
+		self.connect(shortcut, QtCore.SIGNAL("activated()"), self.undo)
 		
 		
 		
@@ -108,7 +111,7 @@ class WWTextEdit(QtGui.QTextEdit):
 			# self.highlighter.setDocument(self.document())
 		# if CONSTANTS.WITH_HIGHLIGHTER:
 			# self.highlighter.rehighlight()
-		
+		self.document().clearUndoRedoStacks() # It will empty the history (no "undo" before)
 		
 		self.blockSignals (False)
 		self.setTextCursor(cursor)	
@@ -137,6 +140,7 @@ class WWTextEdit(QtGui.QTextEdit):
 			res=self.language.correct_between_chars(cursor)
 			if res and self.main_window!=None:
 				self.main_window.changeMessageStatusBar("Correction : "+res[0].title)
+				
 			
 		if CONSTANTS.AUTO_CORRECTION:
 			# If we have just written a word (by a space, or a ponctuation) it makes 
@@ -248,6 +252,8 @@ class WWTextEdit(QtGui.QTextEdit):
 		cursor=self.textCursor()
 		cursor.setPosition(0)
 		self.language.cheak_after_paste(cursor)
+		
+	
 	####################################################################
 	
 
@@ -258,6 +264,7 @@ class WWTextEdit(QtGui.QTextEdit):
 		"""
 		self.blockSignals (True)
 		text=source.text()
+		text.replace(QtCore.QString("\t"), QtCore.QString(" "))
 		cursor=self.textCursor()
 		cursor_pos=cursor.position()
 		cursor.insertText(text)
@@ -266,15 +273,7 @@ class WWTextEdit(QtGui.QTextEdit):
 			self.language.cheak_after_paste(cursor,text.size()) 
 		self.blockSignals (False)
 	
-	# def  resizeEvent (self,event):
-		# """A re-implementation of insertFromMimeData. We have to re-run the highlighter.
-		# """
-		# QtGui.QTextEdit.resizeEvent(self,event)
-		# self.blockSignals (True)
-		# if CONSTANTS.WITH_HIGHLIGHTER:
-			# self.highlighter.rehighlight()
-		# self.blockSignals (False)
-		
+	
 	
 	def afterCorrection(self,rule,pos):
 		"""?????????????"""
@@ -316,6 +315,48 @@ class WWTextEdit(QtGui.QTextEdit):
 			self.dico_pluggins[i]=dico[k]
 			mapper.setMapping(short, i)		
 		self.connect(mapper, QtCore.SIGNAL("mapped(int)"), self.SLOT_pluggins )
+	
+	def undo(self):
+		"""
+		This method do the usual undo, except in the case it has there has be a typography correction, in which
+		case it comes back to the state before the events that trigger the correction:
+		exemple:
+		"Hello,<space>you!"       
+			-----     suppress coma     ----->       "Hello<space>you!"
+			-----     another space     ----->       "Hello<space><space>you!"       
+			----- typography correction ----->       "Hello<space>you!"
+			-----        Ctrl-Z         ----->       "Hello,<space>you!"
+		
+		"""
+		print "undo"
+		self.blockSignals (True)
+		if CONSTANTS.DO_TYPOGRAPHY:
+			i=1
+			do_again=True
+			while do_again and i<CONSTANTS.LIM_RECURSIV_UNDO:
+				for j in range(i):
+					QtGui.QTextEdit.undo(self)
+				cursor=self.textCursor()
+				cursor.clearSelection()
+				do_again=self.language.correct_between_chars(cursor)
+				i+=1
+			self.blockSignals (False)
+			self.old_cursor_position=self.textCursor().position() #update the cursor position
+		else:
+			QtGui.QTextEdit.undo(self)
+		
+	
+
+
+	def keyPressEvent(self,event):
+		"""
+		This action grab the Undo KeySequence to execute the special function self.undo .
+		"""
+		if (event.matches(QtGui.QKeySequence.Undo)):
+				self.undo()
+		else:
+			QtGui.QTextEdit.keyPressEvent(self,event)
+       
 		
 class WWSceneEdit(WWTextEdit):
 	def __init__(self,parent,scene=None,book=None,main_window=None):
@@ -346,6 +387,7 @@ class WWSceneEdit(WWTextEdit):
 		
 		# Creating the new QTextDocument
 		document=QtGui.QTextDocument(self)
+		
 		if CONSTANTS.JUSTIFY:
 			document.setDefaultTextOption(QtGui.QTextOption(QtCore.Qt.AlignJustify))
 		cursor=QtGui.QTextCursor(document)
@@ -375,6 +417,8 @@ class WWSceneEdit(WWTextEdit):
 		
 		if CONSTANTS.WITH_HIGHLIGHTER:
 			self.highlighter=newHighlight
+			
+		self.document().clearUndoRedoStacks() # It will empty the history (no "undo" before)
 		self.blockSignals (False)
 		
 		self.setTextCursor(cursor)	
@@ -446,7 +490,7 @@ if __name__ == '__main__':
 	pp="C:\\Users\\Renaud\\Documents\\Programmation\\Python\\WolfWriter_Test\\TestPerso\\testa.zip"
 	pp="C:\\Users\\Renaud\\Documents\\Programmation\\Python\\WolfWriter_Test\\BigBug\\book1.ww"
 	
-	
+
 	
 	
 	bk=WWBook(zippath=pp)
@@ -461,12 +505,14 @@ if __name__ == '__main__':
 	button= QtGui.QPushButton('ATGC')
 	# button.setAction(textedit.action)
 	
+	
 	# text_edit1=QtGui.QTextEdit()
 	layout=QtGui.QHBoxLayout()
 	layout.addWidget(secenedit)
 	layout.addWidget(textedit)
 	layout.addWidget(simpletextedit)
 	layout.addWidget(button)
+	
 
 	def toto():
 		# dialog=QtGui.QDialog(parent=textedit)

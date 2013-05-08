@@ -73,7 +73,8 @@ class WWConstants:
 			"RECHECK_TEXT_OPEN"		: ( bool		  , False		),
 			"DELETE_TEMP_FILES"		: ( bool		  , True		),
 			"ENCY_TAB_APPLY"		: ( bool		  , True		),
-			"DLT_OPEN_SAVE_SITE"	: ( unicode		  , "~"			)
+			"DLT_OPEN_SAVE_SITE"	: ( unicode		  , "~"			),
+			"LIM_RECURSIV_UNDO"		: ( int			  , 100			),
 			}
 		for key in self.all_constants.keys():
 			self.__dict__[key]=self.all_constants[key][1]
